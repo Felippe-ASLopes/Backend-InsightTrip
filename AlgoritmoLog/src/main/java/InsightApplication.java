@@ -1,6 +1,10 @@
 import ETL.Leitor;
 import Objetos.VooExterior;
 
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -9,6 +13,7 @@ import java.util.List;
 
 public class InsightApplication {
     public static void main(String[] args) {
+//    Extraindo dados do .xlsx
         String nomeArquivo = "chegadas_2023.xlsx";
         Path caminho = Path.of(nomeArquivo);
 
@@ -33,5 +38,9 @@ public class InsightApplication {
             System.err.println("Ocorreu um erro inesperado: " + e.getMessage());
             e.printStackTrace();
         }
+
+//        Conexão S3
+        S3Client s3 = S3Provider.getS3Client();
+        String bucketName = System.getenv("NOME_BUCKET");
     }
 }
