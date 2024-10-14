@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class Leitor {
 
 //    Definição das colunas
+    private static final int COL_NOME_PAIS_ORIGEM = 2;    // C
     private static final int COL_ID_PAIS_ORIGEM = 3;    // D
     private static final int COL_ID_ESTADO_DESTINO = 5; // F
     private static final int COL_VIA = 7;               // H
@@ -45,7 +46,7 @@ public class Leitor {
                 if (row.getRowNum() == 0) {
                     System.out.println("\nLendo cabeçalho");
 
-                    int[] colIndices = {COL_ID_PAIS_ORIGEM, COL_ID_ESTADO_DESTINO, COL_VIA, COL_ANO, COL_MES, COL_QTD_VIAGENS};
+                    int[] colIndices = {COL_NOME_PAIS_ORIGEM, COL_ID_PAIS_ORIGEM, COL_ID_ESTADO_DESTINO, COL_VIA, COL_ANO, COL_MES, COL_QTD_VIAGENS};
 
                     for (int i = 0; i < colIndices.length; i++) {
                         Cell cell = row.getCell(colIndices[i]);
@@ -57,6 +58,7 @@ public class Leitor {
                 System.out.println("Lendo linha " + row.getRowNum());
 
                 try {
+                    String nomePaisOrigem = row.getCell(COL_NOME_PAIS_ORIGEM).getStringCellValue();
                     Integer idPaisOrigem = getIntegerCellValue(row.getCell(COL_ID_PAIS_ORIGEM));
                     Integer idEstadoDestino = getIntegerCellValue(row.getCell(COL_ID_ESTADO_DESTINO));
                     Integer via = getIntegerCellValue(row.getCell(COL_VIA));
@@ -64,7 +66,18 @@ public class Leitor {
                     Integer mes = getIntegerCellValue(row.getCell(COL_MES));
                     Integer qtdViagens = getIntegerCellValue(row.getCell(COL_QTD_VIAGENS));
 
-                    if (via == 1 && qtdViagens > 0 && idPaisOrigem != null && idEstadoDestino != null && ano != null && mes != null) {
+                    if (via == 1 && qtdViagens > 0 &&
+                            idPaisOrigem != null && !nomePaisOrigem.equals("Outros Países") && !nomePaisOrigem.equals("Países não especificados") &&
+                            idEstadoDestino != null && idEstadoDestino != 99 &&
+                            ano != null && mes != null) {
+
+//                        Transformando paisOrigem "China, Hong Kong" em "China"
+                        if (idPaisOrigem == 41) {
+                            nomePaisOrigem = "China";
+                            idPaisOrigem = 40;
+                        }
+
+                        System.out.println("Adicionando viagem a lista: " + nomePaisOrigem + " - " + idPaisOrigem + " - " + idEstadoDestino + " - " + ano + " - " + mes + " - " + qtdViagens);
                         VooExterior voo = new VooExterior(idPaisOrigem, idEstadoDestino, ano, mes, qtdViagens);
                         voosExtraidos.add(voo);
                     }

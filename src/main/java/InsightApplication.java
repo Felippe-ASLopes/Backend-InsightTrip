@@ -1,7 +1,9 @@
 import ETL.Leitor;
-import ETL.S3Provider;
-import Objetos.VooExterior;
+import Conexão.*;
+import Objetos.*;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -17,8 +19,11 @@ public class InsightApplication {
     public static void main(String[] args) {
 //        Conexão S3
         S3Client s3Client = new S3Provider().getS3Client();
-//        S3Client s3 = S3Provider.getS3Client();
         String bucketName = System.getenv("NOME_BUCKET");
+
+//        Conexão BD
+        DataBaseProvider cnp = new DataBaseProvider();
+        JdbcTemplate connection = cnp.getConnection();
 
 //        Listando objetos no bucket
         try {
@@ -35,7 +40,7 @@ public class InsightApplication {
             System.err.println("Erro ao listar objetos no bucket: " + e.getMessage());
         }
 
-//        Baixando arquivos
+//        Baixando arquivos Bucket
         try {
             List<S3Object> objects = s3Client.listObjects(ListObjectsRequest.builder().bucket(bucketName).build()).contents();
             for (S3Object object : objects) {
@@ -60,16 +65,22 @@ public class InsightApplication {
 
             List<VooExterior> voosExtraidos = Leitor.ExtrairVoo(nomeArquivo, arquivo);
 
-            int numeroDeVoosParaExibir = Math.min(10, voosExtraidos.size());
+//            Enviando para o banco
+            for (VooExterior vooExtraido : voosExtraidos) {
 
-            System.out.println("Exibindo os " + numeroDeVoosParaExibir + " primeiros voos:\n");
+                String dataViagem = String.format("%04d-%02d-%s", vooExtraido.getAno(), vooExtraido.getMes(), "01");
+                String sqlInsertDatas = "INSERT INTO Passagem (NomePassagem, Natureza, Origem, Destino, dtViagem, fkAgencia) \n" +
+                        "VALUES (?, ?, ?, ?, ?, ?);\n";
 
-            for (int i = 0; i < numeroDeVoosParaExibir; i++) {
-                VooExterior voo = voosExtraidos.get(i);
-                System.out.println(voo.toString());
-                System.out.println("----------------------------");
+                try {
+                    System.out.println("Inserindo viagem: " + vooExtraido.toString());
+                    connection.update(sqlInsertDatas, vooExtraido.createName(), "Internacional", vooExtraido.converterToStringPaisOrigem(),
+                            vooExtraido.converterToStringEstado(), dataViagem, null);
+                } catch (Exception e) {
+                    System.out.println("Erro ao executar query: " + sqlInsertDatas);
+                    e.printStackTrace();
+                }
             }
-
         } catch (IOException e) {
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());
             e.printStackTrace();
@@ -78,6 +89,20 @@ public class InsightApplication {
             e.printStackTrace();
         }
 
+        System.out.println("Viagens inseridas no banco!");
 
+//        Exibindo primeiras 10 passagens do banco
+        String sqlStart = "SELECT * FROM Passagem LIMIT 10;";
+        SqlRowSet rowSet = connection.queryForRowSet(sqlStart);
+
+        while (rowSet.next()) {
+            System.out.println("Passagem: " + rowSet.getString(1));
+            System.out.println("Natureza: " + rowSet.getString(2));
+            System.out.println("Origem: " + rowSet.getString(3));
+            System.out.println("Destino: " + rowSet.getString(4));
+            System.out.println("Data Viagem: " + rowSet.getString(5));
+            System.out.println("FK Agencia: " + rowSet.getString(6));
+            System.out.println();
+        }
     }
 }
