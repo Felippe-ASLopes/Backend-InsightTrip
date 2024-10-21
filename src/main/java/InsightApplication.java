@@ -1,5 +1,6 @@
-import ETL.Leitor;
+import ETL.LeitorChegadasTuristas;
 import Conexão.*;
+import ETL.LeitorVoos;
 import Objetos.*;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,12 +59,13 @@ public class InsightApplication {
         }
 
 //    Extraindo dados do .xlsx
+
         String nomeArquivo = "chegadas_2023.xlsx";
         Path caminho = Path.of(nomeArquivo);
 
         try (InputStream arquivo = Files.newInputStream(caminho)) {
 
-            List<VooExterior> voosExtraidos = Leitor.ExtrairVoo(nomeArquivo, arquivo);
+            List<VooExterior> voosExtraidos = LeitorChegadasTuristas.ExtrairVoo(nomeArquivo, arquivo);
 
 //            Enviando para o banco
             for (VooExterior vooExtraido : voosExtraidos) {
