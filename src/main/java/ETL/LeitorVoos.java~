@@ -111,8 +111,7 @@ public class LeitorVoos {
                             ufAeroportoOrigem = Estado.ConverterNomeEstado(ufAeroportoOrigem);
                         }
 
-                        nomePaisOrigem = FormaterUtils.formatarNomes(nomePaisOrigem);
-                        nomeContinenteOrigem = FormaterUtils.formatarNomes(nomeContinenteOrigem);
+                        nomePaisOrigem = FormaterUtils.formatarNomePais(nomePaisOrigem);
 
                         VooAnac viagem = new VooAnac(ano, mes,
                                 nomeAeroportoOrigem, ufAeroportoOrigem, regiaoAeroportoOrigem, nomePaisOrigem, nomeContinenteOrigem,

@@ -16,7 +16,7 @@ public class Estado {
         this.nome = nome;
         this.regiao = regiao;
         this.país = país;
-        this.codigoIbge = converterCodigoIBGE(regiao);
+        this.codigoIbge = ConverterCodigoIBGE(regiao);
     }
 
     public String getNome() {
@@ -43,7 +43,7 @@ public class Estado {
         this.codigoIbge = codigoIbge;
     }
 
-    public int converterCodigoIBGE(String uf) {
+    public int ConverterCodigoIBGE(String uf) {
         return switch (uf) {
             case "Acre" -> 12;
             case "Alagoas" -> 27;
@@ -75,4 +75,38 @@ public class Estado {
             default -> -1;
         };
     }
+
+    public static String ConverterNomeEstado(String uf) {
+    return switch (uf) {
+        case "AC" -> "Acre";
+        case "AL" -> "Alagoas";
+        case "AP" -> "Amapá";
+        case "AM" -> "Amazonas";
+        case "BA" -> "Bahia";
+        case "CE" -> "Ceará";
+        case "DF" -> "Distrito Federal";
+        case "ES" -> "Espírito Santo";
+        case "GO" -> "Goiás";
+        case "MA" -> "Maranhão";
+        case "MT" -> "Mato Grosso";
+        case "MS" -> "Mato Grosso do Sul";
+        case "MG" -> "Minas Gerais";
+        case "PA" -> "Pará";
+        case "PB" -> "Paraíba";
+        case "PR" -> "Paraná";
+        case "PE" -> "Pernambuco";
+        case "PI" -> "Piauí";
+        case "RN" -> "Rio Grande do Norte";
+        case "RS" -> "Rio Grande do Sul";
+        case "RJ" -> "Rio de Janeiro";
+        case "RO" -> "Rondônia";
+        case "RR" -> "Roraima";
+        case "SC" -> "Santa Catarina";
+        case "SP" -> "São Paulo";
+        case "SE" -> "Sergipe";
+        case "TO" -> "Tocantins";
+        default -> "Estado desconhecido";
+    };
+}
+
 }

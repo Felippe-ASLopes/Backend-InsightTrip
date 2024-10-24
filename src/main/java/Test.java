@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,13 +19,26 @@ public class Test {
 
             List<VooAnac> viagensExtraidas = LeitorVoos.ExtrairViagem(nomeArquivo, arquivo);
 
-            Set<String> uniquePaisOrigem = viagensExtraidas.stream()
-                    .map(VooAnac::getPaisOrigem)
-                    .filter(pais -> pais != null && !pais.isEmpty())
+            Map<String, String> paisesEContinentesUnicos = viagensExtraidas.stream()
+                    .filter(voo -> voo.getPaisOrigem() != null && !voo.getPaisOrigem().isEmpty())
+                    .collect(Collectors.toMap(
+                            VooAnac::getPaisOrigem,
+                            VooAnac::getContinentePaisOrigem,
+                            (continenteExistente, novoContinente) -> continenteExistente
+                    ));
+
+            Set<String> estadosOrigemUnicos = viagensExtraidas.stream()
+                    .map(VooAnac::getUfAeroportoOrigem)
+                    .filter(estado -> estado != null && !estado.isEmpty())
                     .collect(Collectors.toSet());
 
-            System.out.println("Países de Origem Únicos:");
-            uniquePaisOrigem.forEach(System.out::println);
+            paisesEContinentesUnicos.forEach((pais, continente) ->
+                    System.out.println("País: " + pais + ", Continente: " + continente)
+            );
+
+            System.out.println("Estados de Destino Únicos:");
+            estadosOrigemUnicos.forEach(System.out::println);
+            System.out.println(estadosOrigemUnicos.size());
 
 
         } catch (IOException e) {
