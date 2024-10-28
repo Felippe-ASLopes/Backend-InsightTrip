@@ -4,7 +4,6 @@ public class Estado {
 
     private String nome;
     private String regiao;
-    private País país;
     private Integer codigoIbge;
 
     //Contrutor vazio para o Hibernate
@@ -12,11 +11,10 @@ public class Estado {
 
 
     //Construtor
-    public Estado(String nome, String regiao, País país) {
+    public Estado(String nome, String regiao) {
         this.nome = nome;
         this.regiao = regiao;
-        this.país = país;
-        this.codigoIbge = ConverterCodigoIBGE(regiao);
+        this.codigoIbge = ConverterCodigoIBGE(nome);
     }
 
     public String getNome() {

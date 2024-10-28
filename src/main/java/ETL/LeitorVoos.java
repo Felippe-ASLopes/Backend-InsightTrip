@@ -8,15 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Objetos.Estado;
-import Objetos.País;
 import Objetos.VooAnac;
-import Utils.FormaterUtils;
 import Utils.CellUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static Log.Log.LOG_COLOR_RESET;
+import static Log.Log.LOG_COLOR_GREEN;
+import static Log.Log.LOG_COLOR_YELLOW;
+import static Log.Log.LOG_COLOR_RED;
+import static Utils.FormaterUtils.formatarNomes;
 
 public class LeitorVoos {
+
+    private static final Logger logger = LoggerFactory.getLogger(LeitorVoos.class);
 
     //    Definição das colunas
     private static final int COL_ANO = 3;               // D
@@ -35,7 +43,7 @@ public class LeitorVoos {
 
     public static List<VooAnac> ExtrairViagem(String nomeArquivo, InputStream arquivo) {
         try {
-            System.out.println("\nIniciando leitura do arquivo %s\n".formatted(nomeArquivo));
+            logger.info("{} Iniciando leitura do arquivo {} {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
 
             Workbook workbook;
             if (nomeArquivo.endsWith(".xlsx")) {
@@ -60,11 +68,12 @@ public class LeitorVoos {
                     for (int i = 0; i < colIndices.length; i++) {
                         Cell cell = row.getCell(colIndices[i]);
                         String coluna = (cell != null) ? cell.getStringCellValue() : "N/A";
+                        logger.info("Coluna {}: {}", i, coluna);
                     }
                     continue;
                 }
 
-                System.out.println("Lendo linha " + row.getRowNum());
+                logger.info("Lendo linha {}", row.getRowNum());
 
                 try {
 //                    Dados obrigatórios
@@ -111,8 +120,12 @@ public class LeitorVoos {
                             ufAeroportoOrigem = Estado.ConverterNomeEstado(ufAeroportoOrigem);
                         }
 
-                        nomePaisOrigem = FormaterUtils.formatarNomes(nomePaisOrigem);
-                        nomeContinenteOrigem = FormaterUtils.formatarNomes(nomeContinenteOrigem);
+                        if (regiaoAeroportoOrigem != null) {
+                            regiaoAeroportoOrigem = formatarNomes(regiaoAeroportoOrigem);
+                        }
+
+                        nomePaisOrigem = formatarNomes(nomePaisOrigem);
+                        nomeContinenteOrigem = formatarNomes(nomeContinenteOrigem);
 
                         VooAnac viagem = new VooAnac(ano, mes,
                                 nomeAeroportoOrigem, ufAeroportoOrigem, regiaoAeroportoOrigem, nomePaisOrigem, nomeContinenteOrigem,
@@ -122,13 +135,13 @@ public class LeitorVoos {
                         viagensExtraidas.add(viagem);
                     }
                 } catch (NullPointerException | IllegalStateException e) {
-                    System.err.println("Erro ao processar a linha " + row.getRowNum() + ": " + e.getMessage());
+                    logger.error("Erro ao processar a linha {}: {}", row.getRowNum(), e.getMessage());
                 }
             }
 
             workbook.close();
 
-            System.out.println("\nLeitura do arquivo finalizada\n");
+            logger.info("{} Leitura do arquivo finalizada {}", LOG_COLOR_GREEN, LOG_COLOR_RESET);
 
             return viagensExtraidas;
         } catch (IOException e) {

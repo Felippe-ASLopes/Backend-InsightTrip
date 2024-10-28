@@ -12,6 +12,11 @@ public class Log {
 
     private static final Logger logger = Logger.getLogger(Log.class.getName());
 
+    public static final String LOG_COLOR_RESET = "\u001B[0m";
+    public static final String LOG_COLOR_RED = "\u001B[31m";
+    public static final String LOG_COLOR_GREEN = "\u001B[32m";
+    public static final String LOG_COLOR_YELLOW = "\u001B[33m";
+
     public static void main(String[] args) {
         try {
 
@@ -40,25 +45,20 @@ public class Log {
 
     static class CustomFormatter extends Formatter {
 
-        private static final String RESET = "\u001B[0m";
-        private static final String RED = "\u001B[31m";
-        private static final String GREEN = "\u001B[32m";
-        private static final String YELLOW = "\u001B[33m";
-
         @Override
         public String format(LogRecord record) {
             StringBuilder sb = new StringBuilder();
 
             if (record.getLevel().intValue() >= Level.SEVERE.intValue()) {
-                sb.append(RED);
+                sb.append(LOG_COLOR_RED);
             } else if (record.getLevel().intValue() >= Level.INFO.intValue()) {
-                sb.append(GREEN);
+                sb.append(LOG_COLOR_GREEN);
             } else {
-                sb.append(YELLOW);
+                sb.append(LOG_COLOR_YELLOW);
             }
 
             sb.append(formatMessage(record));
-            sb.append(RESET).append("\n");
+            sb.append(LOG_COLOR_RESET).append("\n");
 
             return sb.toString();
         }

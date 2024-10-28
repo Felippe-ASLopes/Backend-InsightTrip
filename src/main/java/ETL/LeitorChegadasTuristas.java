@@ -14,21 +14,25 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LeitorChegadasTuristas {
 
-//    Definição das colunas
+    private static final Logger logger = LoggerFactory.getLogger(LeitorChegadasTuristas.class);
+
+    // Definição das colunas
     private static final int COL_NOME_PAIS_ORIGEM = 2;    // C
-    private static final int COL_ID_PAIS_ORIGEM = 3;    // D
-    private static final int COL_ID_ESTADO_DESTINO = 5; // F
-    private static final int COL_VIA = 7;               // H
-    private static final int COL_ANO = 8;               // I
-    private static final int COL_MES = 10;              // K
-    private static final int COL_QTD_VIAGENS = 11;      // L
+    private static final int COL_ID_PAIS_ORIGEM = 3;      // D
+    private static final int COL_ID_ESTADO_DESTINO = 5;   // F
+    private static final int COL_VIA = 7;                 // H
+    private static final int COL_ANO = 8;                 // I
+    private static final int COL_MES = 10;                // K
+    private static final int COL_QTD_VIAGENS = 11;        // L
 
     public static List<VooExterior> ExtrairVoo(String nomeArquivo, InputStream arquivo) {
         try {
-            System.out.println("\nIniciando leitura do arquivo %s\n".formatted(nomeArquivo));
+            logger.info("\nIniciando leitura do arquivo {}\n", nomeArquivo);
 
             Workbook workbook;
             if (nomeArquivo.endsWith(".xlsx")) {
@@ -50,11 +54,12 @@ public class LeitorChegadasTuristas {
                     for (int i = 0; i < colIndices.length; i++) {
                         Cell cell = row.getCell(colIndices[i]);
                         String coluna = (cell != null) ? cell.getStringCellValue() : "N/A";
+                        // Se necessário, você pode logar os nomes das colunas aqui
                     }
                     continue;
                 }
 
-                System.out.println("Lendo linha " + row.getRowNum());
+                logger.info("Lendo linha {}", row.getRowNum());
 
                 try {
                     String nomePaisOrigem = row.getCell(COL_NOME_PAIS_ORIGEM).getStringCellValue();
@@ -70,27 +75,29 @@ public class LeitorChegadasTuristas {
                             idEstadoDestino != null && idEstadoDestino != 99 &&
                             ano != null && mes != null) {
 
-//                        Transformando paisOrigem "China, Hong Kong" em "China"
+                        // Transformando paisOrigem "China, Hong Kong" em "China"
                         if (idPaisOrigem == 41) {
                             nomePaisOrigem = "China";
                             idPaisOrigem = 40;
                         }
 
-                        System.out.println("Adicionando viagem a lista: " + nomePaisOrigem + " - " + idPaisOrigem + " - " + idEstadoDestino + " - " + ano + " - " + mes + " - " + qtdViagens);
+                        logger.info("Adicionando viagem à lista: {} - {} - {} - {} - {} - {}",
+                                nomePaisOrigem, idPaisOrigem, idEstadoDestino, ano, mes, qtdViagens);
                         VooExterior voo = new VooExterior(idPaisOrigem, idEstadoDestino, ano, mes, qtdViagens);
                         voosExtraidos.add(voo);
                     }
                 } catch (NullPointerException | IllegalStateException e) {
-                    System.err.println("Erro ao processar a linha " + row.getRowNum() + ": " + e.getMessage());
+                    logger.error("Erro ao processar a linha {}: {}", row.getRowNum(), e.getMessage());
                 }
             }
 
             workbook.close();
 
-            System.out.println("\nLeitura do arquivo finalizada\n");
+            logger.info("\nLeitura do arquivo finalizada\n");
 
             return voosExtraidos;
         } catch (IOException e) {
+            logger.error("Erro ao ler o arquivo {}: {}", nomeArquivo, e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
