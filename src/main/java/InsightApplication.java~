@@ -32,7 +32,7 @@ public class InsightApplication {
 
     public static void main(String[] args) {
 
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv
         // Conexão S3
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = dotenv.get("NOME_BUCKET");

@@ -1,5 +1,6 @@
 package Conexão;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -8,12 +9,13 @@ public class DataBaseProvider {
     private JdbcTemplate connection;
 
     public DataBaseProvider() {
-//        Configure as variáveis de ambiente
-        String host = System.getenv("DB_HOST");
-        String port = System.getenv("DB_PORT");
-        String dbName = System.getenv("DB_NAME");
-        String user = System.getenv("DB_USER");
-        String password = System.getenv("DB_PASSWORD");
+        Dotenv dotenv = Dotenv.load();
+        // Configure as variáveis de ambiente
+        String host = dotenv.get("DB_HOST");
+        String port = dotenv.get("DB_PORT");
+        String dbName = dotenv.get("DB_NAME");
+        String user = dotenv.get("DB_USER");
+        String password = dotenv.get("DB_PASSWORD");
 
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
