@@ -11,7 +11,7 @@ public class Agencia {
     private String cnpj;
     private String cep;
     private Funcionario administrador;
-    private List<Aeroporto> aeroportos = new ArrayList<>();
+    private List<AeroportoInfo> aeroportos = new ArrayList<>();
 
     //Contrutor vazio para o Hibernate
     public Agencia() {

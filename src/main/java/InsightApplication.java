@@ -31,8 +31,8 @@ public class InsightApplication {
     private static final Logger logger = LoggerFactory.getLogger(InsightApplication.class);
 
     public static void main(String[] args) {
-
         Dotenv dotenv = Dotenv.load();
+
         // Conexão S3
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = dotenv.get("NOME_BUCKET");
