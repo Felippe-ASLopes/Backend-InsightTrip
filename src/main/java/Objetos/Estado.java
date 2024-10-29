@@ -6,11 +6,6 @@ public class Estado {
     private String regiao;
     private Integer codigoIbge;
 
-    //Contrutor vazio para o Hibernate
-    public Estado(){}
-
-
-    //Construtor
     public Estado(String nome, String regiao) {
         this.nome = nome;
         this.regiao = regiao;

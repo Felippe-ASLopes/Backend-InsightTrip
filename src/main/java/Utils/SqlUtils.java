@@ -1,24 +1,25 @@
 package Utils;
 
-import Objetos.AeroportoInfo;
 import Objetos.Estado;
+import Objetos.Pais;
 import Objetos.VooAnac;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SqlUtils {
-    public static String ConstruirSqlInsertPais(Map<String, String> paisesEContinentes) {
-        if (paisesEContinentes.isEmpty()) {
+    public static String ConstruirInsertPais(List<Pais> paisesUnicos) {
+        if (paisesUnicos == null || paisesUnicos.isEmpty()) {
             return "";
         }
 
         StringBuilder sql = new StringBuilder("INSERT INTO Pais (Nome, Continente) VALUES ");
 
-        List<String> valores = paisesEContinentes.entrySet().stream()
-                .map(entry -> String.format("('%s', '%s')",
-                        escaparString(entry.getKey()),
-                        escaparString(entry.getValue())))
+        List<String> valores = paisesUnicos.stream()
+                .map(pais -> String.format("('%s', '%s')",
+                        escaparString(pais.getNome()),
+                        escaparString(pais.getContinente())))
                 .collect(Collectors.toList());
 
         sql.append(String.join(", ", valores));
@@ -27,16 +28,16 @@ public class SqlUtils {
         return sql.toString();
     }
 
-    public static String ConstruirSqlInsertEstado(Map<String, Estado> estados) {
-        if (estados.isEmpty()) {
+    public static String ConstruirInsertEstado(List<Estado> estadosUnicos) {
+        if (estadosUnicos == null || estadosUnicos.isEmpty()) {
             return "";
         }
 
         StringBuilder sql = new StringBuilder("INSERT INTO UF (CodigoIBGE, Nome, Regiao) VALUES ");
 
-        List<String> valores = estados.values().stream()
-                .map(estado -> String.format("(%s, '%s', '%s')",
-                        escaparString(String.valueOf(estado.getCodigoIbge())),
+        List<String> valores = estadosUnicos.stream()
+                .map(estado -> String.format("(%d, '%s', '%s')",
+                        estado.getCodigoIbge(),
                         escaparString(estado.getNome()),
                         escaparString(estado.getRegiao()))
                 )
@@ -48,50 +49,50 @@ public class SqlUtils {
         return sql.toString();
     }
 
-    public static String ConstruirSqlInsertAeroporto(
+    public static String ConstruirInsertAeroporto(
             List<VooAnac> viagensExtraidas,
-            Map<String, String> paisesEContinentesUnicos,
-            Map<String, Estado> EstadosRegioes
+            List<Pais> paisesUnicos,
+            List<Estado> estadosUnicos
     ) {
-        if (viagensExtraidas.isEmpty() || paisesEContinentesUnicos.isEmpty()) {
-            return "";
-        }
-
-        // 1. Atribuir IDs aos países com base na ordem do mapa (assumindo ordem como LinkedHashMap)
-        Map<String, Integer> paisToId = new LinkedHashMap<>();
-        int id = 1;
-        for (String pais : paisesEContinentesUnicos.keySet()) {
-            paisToId.put(pais, id++);
-        }
-
-        // 2. Coletar aeroportos únicos com informações de país e estado
-        Map<String, AeroportoInfo> aeroportosOrigem = viagensExtraidas.stream()
-                .filter(voo -> voo.getAeroportoOrigem() != null && !voo.getAeroportoOrigem().isEmpty())
-                .collect(Collectors.toMap(
-                        VooAnac::getAeroportoOrigem,
-                        voo -> new AeroportoInfo(voo.getPaisOrigem(), voo.getUfAeroportoOrigem()),
-                        (aeroportoExistente, aeroportoNovo) -> aeroportoExistente
-                ));
-
-        if (aeroportosOrigem.isEmpty()) {
+        if (viagensExtraidas == null || viagensExtraidas.isEmpty() ||
+                paisesUnicos == null || paisesUnicos.isEmpty()) {
             return "";
         }
 
         StringBuilder sql = new StringBuilder("INSERT INTO Aeroporto (NomeAeroporto, fkPais, fkEstado) VALUES ");
 
-        List<String> valores = aeroportosOrigem.entrySet().stream()
+        Map<String, Integer> idPaises = paisesUnicos.stream()
+                .collect(Collectors.toMap(Pais::getNome, Pais::getId));
+
+        Map<String, Estado> codigoEstados = estadosUnicos.stream()
+                .collect(Collectors.toMap(Estado::getNome, Function.identity()));
+
+        Map<String, VooAnac> aeroportos = viagensExtraidas.stream()
+                .filter(voo -> voo.getAeroportoOrigem() != null && !voo.getAeroportoOrigem().isEmpty())
+                .collect(Collectors.toMap(
+                        VooAnac::getAeroportoOrigem,
+                        Function.identity(),
+                        (existing, replacement) -> existing
+                ));
+
+        if (aeroportos.isEmpty()) {
+            return "";
+        }
+
+        List<String> valores = aeroportos.entrySet().stream()
                 .map(entry -> {
                     String nomeAeroporto = escaparString(entry.getKey());
-                    String pais = entry.getValue().getPaisOrigem();
-                    Integer fkPais = paisToId.get(pais);
+                    VooAnac voo = entry.getValue();
+                    String paisOrigem = voo.getPaisOrigem();
+                    Integer fkPais = idPaises.get(paisOrigem);
 
                     if (fkPais == null) {
                         return null;
                     }
 
-                    if ("Brasil".equalsIgnoreCase(pais)) {
-                        String uf = entry.getValue().getUfOrigem();
-                        Estado estado = EstadosRegioes.get(uf);
+                    if (paisOrigem.equalsIgnoreCase("Brasil")) {
+                        String ufOrigem = voo.getUfAeroportoOrigem();
+                        Estado estado = codigoEstados.get(ufOrigem);
                         if (estado != null && estado.getCodigoIbge() != null) {
                             return String.format("('%s', %d, %d)",
                                     nomeAeroporto,
@@ -120,6 +121,27 @@ public class SqlUtils {
 
         return sql.toString();
     }
+
+//    public static String ConstruirSqlInsertViagens(List<VooAnac> viagensExtraidas) {
+//        if (viagensExtraidas.isEmpty()) {
+//            return "";
+//        }
+//
+//        StringBuilder sql = new StringBuilder("INSERT INTO Viagem (dtViagem, fkAeroportoOrigem, fkAeroportoDestino) VALUES ");
+//
+//        List<String> valores = viagensExtraidas.values().stream()
+//                .map(estado -> String.format("(%s, '%s', '%s')",
+//                        escaparString(String.valueOf(estado.getCodigoIbge())),
+//                        escaparString(estado.getNome()),
+//                        escaparString(estado.getRegiao()))
+//                )
+//                .collect(Collectors.toList());
+//
+//        sql.append(String.join(", ", valores));
+//        sql.append(";");
+//
+//        return sql.toString();
+//    }
 
     private static String escaparString(String input) {
         return input.replace("'", "''");

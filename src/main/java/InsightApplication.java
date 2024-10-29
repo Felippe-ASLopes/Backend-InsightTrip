@@ -16,15 +16,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
-import static Log.Log.LOG_COLOR_YELLOW;
-import static Log.Log.LOG_COLOR_RED;
 import static Utils.SqlUtils.*;
-import static Utils.SqlUtils.ConstruirSqlInsertAeroporto;
+import static Utils.SqlUtils.ConstruirInsertAeroporto;
 
 public class InsightApplication {
 
@@ -85,30 +83,42 @@ public class InsightApplication {
 
             List<VooAnac> viagensExtraidas = LeitorVoos.ExtrairViagem(nomeArquivo, arquivo);
 
-            Map<String, String> paisesEContinentesUnicos = viagensExtraidas.stream()
+            AtomicInteger idGenerator = new AtomicInteger(1);
+
+            List<Pais> paisesUnicos = viagensExtraidas.stream()
                     .filter(voo -> voo.getPaisOrigem() != null && !voo.getPaisOrigem().isEmpty())
                     .collect(Collectors.toMap(
                             VooAnac::getPaisOrigem,
                             VooAnac::getContinentePaisOrigem,
                             (continenteExistente, novoContinente) -> continenteExistente
-                    ));
+                    ))
+                    .entrySet().stream()
+                    .map(entry -> new Pais(
+                            idGenerator.getAndIncrement(),
+                            entry.getKey(),
+                            entry.getValue()
+                    ))
+                    .collect(Collectors.toList());
 
-            String sqlInsertPais = ConstruirSqlInsertPais(paisesEContinentesUnicos);
+            String sqlInsertPais = ConstruirInsertPais(paisesUnicos);
 
-            Map<String, Estado> EstadosRegioes = viagensExtraidas.stream()
+            List<Estado> estadosUnicos = viagensExtraidas.stream()
                     .filter(voo -> voo.getUfAeroportoOrigem() != null && !voo.getUfAeroportoOrigem().isEmpty())
                     .collect(Collectors.toMap(
                             VooAnac::getUfAeroportoOrigem,
-                            voo -> new Estado(
-                                    voo.getUfAeroportoOrigem(),
-                                    voo.getRegiaoAeroportoOrigem()
-                            ),
+                            voo -> new Estado(voo.getUfAeroportoOrigem(), voo.getRegiaoAeroportoOrigem()),
                             (estadoExistente, estadoNovo) -> estadoExistente
-                    ));
+                    ))
+                    .values().stream()
+                    .map(estado -> new Estado(
+                            estado.getNome(),
+                            estado.getRegiao()
+                    ))
+                    .collect(Collectors.toList());
 
-            String sqlInsertEstados = ConstruirSqlInsertEstado(EstadosRegioes);
+            String sqlInsertEstados = ConstruirInsertEstado(estadosUnicos);
 
-            String sqlInsertAeroporto = ConstruirSqlInsertAeroporto(viagensExtraidas, paisesEContinentesUnicos, EstadosRegioes);
+            String sqlInsertAeroporto = ConstruirInsertAeroporto(viagensExtraidas, paisesUnicos, estadosUnicos);
 
             // Enviando ao Banco
             try {

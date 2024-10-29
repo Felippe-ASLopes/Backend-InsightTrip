@@ -1,22 +1,9 @@
 package Objetos;
 
-public class País {
-
+public class Pais {
+    private Integer id;
     private String nome;
     private String continente;
-
-    public País(String nome, String continente) {
-        this.nome = nome;
-        this.continente = continente;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public String getContinente() {
-        return continente;
-    }
 
     public static String obterContinente(String pais) {
         return switch (pais) {
@@ -34,4 +21,35 @@ public class País {
             default -> "País não encontrado ou fora do escopo.";
         };
     }
+
+    public Pais(Integer id, String nome, String continente) {
+        this.id = id;
+        this.nome = nome;
+        this.continente = continente;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getContinente() {
+        return continente;
+    }
+
+    public void setContinente(String continente) {
+        this.continente = continente;
+    }
+
 }

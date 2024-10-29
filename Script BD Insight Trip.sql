@@ -72,10 +72,12 @@ CREATE TABLE EstadoHasEventos (
 CREATE TABLE Aeroporto (
     idAeroporto INT PRIMARY KEY AUTO_INCREMENT,
     NomeAeroporto VARCHAR(75),
-    SiglaAeroporto VARCHAR(10), 
     fkEstado INT,
+    fkPais INT,
     CONSTRAINT fkEstadoAeroportos FOREIGN KEY (fkEstado) 
-        REFERENCES UF(CodigoIBGE)
+        REFERENCES UF(CodigoIBGE),
+	CONSTRAINT fkPaisAeroportos FOREIGN KEY (fkPais) 
+        REFERENCES Pais(idPais)
 );
 
 CREATE TABLE Viagem (
@@ -101,6 +103,14 @@ CREATE TABLE Passageiros (
 
 select * from pais;
 select * from UF;
+select * from aeroporto;
+
+SELECT idAeroporto, nomeAeroporto, UF.Nome AS NomeUF, Pais.Nome AS NomePais
+FROM aeroporto
+JOIN Pais ON idPais = fkPais
+LEFT JOIN UF ON CodigoIBGE = fkEstado
+ORDER BY Pais.Nome;
+
 
 -- DROP USER 'API'@'localhost'; --
 -- DROP DATABASE InsightTrip--
