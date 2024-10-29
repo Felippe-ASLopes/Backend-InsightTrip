@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static Utils.SqlUtils.ConstruirSqlInsertEstado;
-import static Utils.SqlUtils.ConstruirSqlInsertPais;
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
 import static Log.Log.LOG_COLOR_YELLOW;
 import static Log.Log.LOG_COLOR_RED;
+import static Utils.SqlUtils.*;
+import static Utils.SqlUtils.ConstruirSqlInsertAeroporto;
 
 public class InsightApplication {
 
@@ -32,7 +32,6 @@ public class InsightApplication {
 
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
-
         // Conexão S3
         S3Client s3Client = new S3Provider().getS3Client();
         String bucketName = dotenv.get("NOME_BUCKET");
@@ -109,6 +108,8 @@ public class InsightApplication {
 
             String sqlInsertEstados = ConstruirSqlInsertEstado(EstadosRegioes);
 
+            String sqlInsertAeroporto = ConstruirSqlInsertAeroporto(viagensExtraidas, paisesEContinentesUnicos, EstadosRegioes);
+
             // Enviando ao Banco
             try {
                 logger.info("Inserindo países: {}", sqlInsertPais);
@@ -118,6 +119,10 @@ public class InsightApplication {
                 logger.info("Inserindo estados: {}", sqlInsertEstados);
                 int rowsEstados = connection.update(sqlInsertEstados);
                 logger.info("{} Inseridos {} estados com sucesso. {}", LOG_COLOR_GREEN, rowsEstados, LOG_COLOR_RESET);
+
+                logger.info("Inserindo Aeroportos: {}", sqlInsertAeroporto);
+                int rowsAeroportos = connection.update(sqlInsertAeroporto);
+                logger.info("{} Inseridos {} aeroportos com sucesso. {}", LOG_COLOR_GREEN, rowsAeroportos, LOG_COLOR_RESET);
 
                 logger.info("{} Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
 

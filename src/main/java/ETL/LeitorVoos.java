@@ -124,6 +124,8 @@ public class LeitorVoos {
                             regiaoAeroportoOrigem = formatarNomes(regiaoAeroportoOrigem);
                         }
 
+                        nomeAeroportoOrigem = formatarNomes(nomeAeroportoOrigem);
+                        nomeAeroportoDestino = formatarNomes(nomeAeroportoDestino);
                         nomePaisOrigem = formatarNomes(nomePaisOrigem);
                         nomeContinenteOrigem = formatarNomes(nomeContinenteOrigem);
 
