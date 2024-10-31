@@ -1,14 +1,21 @@
-package Objetos;
+package Model;
 
 public class Aeroporto {
+
+    private Integer id;
     private String nomeAeroporto;
     private Integer fkPais;
     private Integer fkEstado;
 
-    public Aeroporto(String nomeAeroporto, Integer fkPais, Integer fkEstado) {
+    public Aeroporto(Integer id, String nomeAeroporto, Integer fkPais, Integer fkEstado) {
+        this.id = id;
         this.nomeAeroporto = nomeAeroporto;
         this.fkPais = fkPais;
         this.fkEstado = fkEstado;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getNomeAeroporto() {

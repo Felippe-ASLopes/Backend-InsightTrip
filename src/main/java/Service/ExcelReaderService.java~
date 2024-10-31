@@ -1,0 +1,26 @@
+package Service;
+
+import ETL.LeitorVoos;
+import Objetos.VooAnac;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+public class ExcelReaderService {
+    private static final Logger logger = LoggerFactory.getLogger(ExcelReaderService.class);
+
+    public List<VooAnac> extractFlights(String fileName, Path path) {
+        try (InputStream fileStream = Files.newInputStream(path)) {
+            logger.info("Iniciando leitura do arquivo {}", fileName);
+            return LeitorVoos.ExtrairViagem(fileName, fileStream);
+        } catch (IOException e) {
+            logger.error("Erro ao ler o arquivo {}: {}", fileName, e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+}

@@ -1,4 +1,4 @@
-package Conexão;
+package Provider;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;

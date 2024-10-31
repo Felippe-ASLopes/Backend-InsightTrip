@@ -1,148 +1,65 @@
-import ETL.*;
-import Conexão.*;
-import Objetos.*;
-
-import io.github.cdimascio.dotenv.Dotenv;
+import Provider.DataBaseProvider;
+import Service.*;
+import Model.Aeroporto;
+import Model.Estado;
+import Model.Pais;
+import Model.VooAnac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import software.amazon.awssdk.core.sync.ResponseTransformer;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
+import software.amazon.awssdk.services.s3.model.S3Object;
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
-import static Utils.SqlUtils.*;
-import static Utils.SqlUtils.ConstruirInsertAeroporto;
+
+import java.nio.file.Path;
+import java.util.List;
 
 public class InsightApplication {
-
     private static final Logger logger = LoggerFactory.getLogger(InsightApplication.class);
 
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.load();
-        // Conexão S3
-        S3Client s3Client = new S3Provider().getS3Client();
-        String bucketName = dotenv.get("NOME_BUCKET");
-        Boolean acessarBucket = false;
-
-        // Conexão BD
+        S3Service s3Service = new S3Service();
         DataBaseProvider cnp = new DataBaseProvider();
         JdbcTemplate connection = cnp.getConnection();
 
+        ExcelService excelService = new ExcelService();
+        TransformationService transformationService = new TransformationService();
+        InsertionService insertionService = new InsertionService(connection);
+
+        boolean acessarBucket = false;
+
         if (acessarBucket) {
-            // Listando objetos no bucket
+            // Listar e Baixar Arquivos do Bucket
             try {
-                logger.info("{} Iniciando conexão com o bucket {} {}", LOG_COLOR_GREEN, bucketName, LOG_COLOR_RESET);
-
-                ListObjectsRequest listObjects = ListObjectsRequest.builder()
-                        .bucket(bucketName)
-                        .build();
-
-                List<S3Object> objects = s3Client.listObjects(listObjects).contents();
-                logger.info("Objetos no bucket {}:", bucketName);
-                for (S3Object object : objects) {
-                    logger.info("- {}", object.key());
-                }
-            } catch (S3Exception e) {
-                logger.error("Erro ao listar objetos no bucket: {}", e.getMessage(), e);
-            }
-
-            // Baixando arquivos do Bucket
-            try {
-                List<S3Object> objects = s3Client.listObjects(ListObjectsRequest.builder().bucket(bucketName).build()).contents();
-                for (S3Object object : objects) {
-                    GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(object.key())
-                            .build();
-
-                    InputStream inputStream = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream());
-                    Files.copy(inputStream, new File(object.key()).toPath());
-                    logger.info("{} Arquivo baixado: {} {}",LOG_COLOR_GREEN, object.key(), LOG_COLOR_RESET);
-                }
-            } catch (IOException | S3Exception e) {
-                logger.error("Erro ao fazer download dos arquivos: {}", e.getMessage(), e);
+                List<S3Object> objetos = s3Service.ListarObjetos();
+                logger.info("Objetos no bucket:");
+                objetos.forEach(obj -> logger.info("- {}", obj.key()));
+                s3Service.BaixarArquivos(objetos);
+            } catch (Exception e) {
+                logger.error("Erro ao processar S3: {}", e.getMessage(), e);
             }
         }
 
-        // Extraindo dados do .xlsx
+        // Processamento do Arquivo Excel
         String nomeArquivo = "resumo_anual_2024.xlsx";
         Path caminho = Path.of(nomeArquivo);
 
-        try (InputStream arquivo = Files.newInputStream(caminho)) {
+        try {
+            List<VooAnac> voos = excelService.ExtrairVoos(nomeArquivo, caminho);
 
-            List<VooAnac> viagensExtraidas = LeitorVoos.ExtrairViagem(nomeArquivo, arquivo);
+            // Transformação dos Dados
+            List<Pais> paises = transformationService.TransformarPaises(voos);
+            List<Estado> estados = transformationService.TransformarEstados(voos);
+            List<Aeroporto> aeroportos = transformationService.TransformarAeroportos(voos, paises, estados);
 
-            AtomicInteger idGenerator = new AtomicInteger(1);
+            // Inserção no Banco de Dados
+            insertionService.insertPaises(paises);
+            insertionService.insertEstados(estados);
+            insertionService.insertAeroportos(aeroportos);
 
-            List<Pais> paisesUnicos = viagensExtraidas.stream()
-                    .filter(voo -> voo.getPaisOrigem() != null && !voo.getPaisOrigem().isEmpty())
-                    .collect(Collectors.toMap(
-                            VooAnac::getPaisOrigem,
-                            VooAnac::getContinentePaisOrigem,
-                            (continenteExistente, novoContinente) -> continenteExistente
-                    ))
-                    .entrySet().stream()
-                    .map(entry -> new Pais(
-                            idGenerator.getAndIncrement(),
-                            entry.getKey(),
-                            entry.getValue()
-                    ))
-                    .collect(Collectors.toList());
-
-            String sqlInsertPais = ConstruirInsertPais(paisesUnicos);
-
-            List<Estado> estadosUnicos = viagensExtraidas.stream()
-                    .filter(voo -> voo.getUfAeroportoOrigem() != null && !voo.getUfAeroportoOrigem().isEmpty())
-                    .collect(Collectors.toMap(
-                            VooAnac::getUfAeroportoOrigem,
-                            voo -> new Estado(voo.getUfAeroportoOrigem(), voo.getRegiaoAeroportoOrigem()),
-                            (estadoExistente, estadoNovo) -> estadoExistente
-                    ))
-                    .values().stream()
-                    .map(estado -> new Estado(
-                            estado.getNome(),
-                            estado.getRegiao()
-                    ))
-                    .collect(Collectors.toList());
-
-            String sqlInsertEstados = ConstruirInsertEstado(estadosUnicos);
-
-            String sqlInsertAeroporto = ConstruirInsertAeroporto(viagensExtraidas, paisesUnicos, estadosUnicos);
-
-            // Enviando ao Banco
-            try {
-                logger.info("Inserindo países: {}", sqlInsertPais);
-                int rowsPais = connection.update(sqlInsertPais);
-                logger.info("{} Inseridos {} países com sucesso. {}", LOG_COLOR_GREEN, rowsPais, LOG_COLOR_RESET);
-
-                logger.info("Inserindo estados: {}", sqlInsertEstados);
-                int rowsEstados = connection.update(sqlInsertEstados);
-                logger.info("{} Inseridos {} estados com sucesso. {}", LOG_COLOR_GREEN, rowsEstados, LOG_COLOR_RESET);
-
-                logger.info("Inserindo Aeroportos: {}", sqlInsertAeroporto);
-                int rowsAeroportos = connection.update(sqlInsertAeroporto);
-                logger.info("{} Inseridos {} aeroportos com sucesso. {}", LOG_COLOR_GREEN, rowsAeroportos, LOG_COLOR_RESET);
-
-                logger.info("{} Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
-
-            } catch (Exception e) {
-                logger.error("Erro ao executar queries de inserção.", e);
-            }
-        } catch (IOException e) {
-            logger.error("Erro ao ler o arquivo: {}", e.getMessage(), e);
+            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
         } catch (Exception e) {
-            logger.error("Ocorreu um erro inesperado: {}", e.getMessage(), e);
+            logger.error("Erro durante o processamento: {}", e.getMessage(), e);
         }
     }
 }

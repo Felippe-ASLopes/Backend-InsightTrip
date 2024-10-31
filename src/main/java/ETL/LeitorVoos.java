@@ -7,8 +7,8 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import Objetos.Estado;
-import Objetos.VooAnac;
+import Model.Estado;
+import Model.VooAnac;
 import Utils.CellUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
-import static Log.Log.LOG_COLOR_YELLOW;
-import static Log.Log.LOG_COLOR_RED;
 import static Utils.FormaterUtils.formatarNomes;
 
 public class LeitorVoos {
@@ -43,8 +41,6 @@ public class LeitorVoos {
 
     public static List<VooAnac> ExtrairViagem(String nomeArquivo, InputStream arquivo) {
         try {
-            logger.info("{} Iniciando leitura do arquivo {} {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
-
             Workbook workbook;
             if (nomeArquivo.endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(arquivo);

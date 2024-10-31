@@ -1,4 +1,4 @@
-package Objetos;
+package Model;
 
 public class Funcionario {
     private String nome;

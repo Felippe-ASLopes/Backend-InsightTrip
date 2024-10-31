@@ -1,4 +1,4 @@
-package Conexão;
+package Provider;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -10,7 +10,6 @@ public class DataBaseProvider {
 
     public DataBaseProvider() {
         Dotenv dotenv = Dotenv.load();
-        // Configure as variáveis de ambiente
         String host = dotenv.get("DB_HOST");
         String port = dotenv.get("DB_PORT");
         String dbName = dotenv.get("DB_NAME");

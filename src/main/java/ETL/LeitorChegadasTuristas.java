@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import Objetos.VooExterior;
+import Model.VooExterior;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
