@@ -3,6 +3,7 @@ package Utils;
 import Model.Aeroporto;
 import Model.Estado;
 import Model.Pais;
+import Model.VooAnac;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,6 +63,51 @@ public class SqlUtils {
                 .collect(Collectors.toList());
 
         sql.append(String.join(", ", valores));
+
+        return sql.toString();
+    }
+
+    public static String ConstruirInsertViagem(List<VooAnac> voos, List<Aeroporto> aeroportos) {
+        if (voos == null || voos.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sql = new StringBuilder("INSERT INTO Viagem (dtViagem, fkAeroportoOrigem, fkAeroportoDestino, QtdPassageirosPagos, QtdPassageirosGratis) VALUES ");
+
+        List<String> valores = new ArrayList<>();
+
+        for (VooAnac voo : voos) {
+            String dtViagem = String.format("%04d-%02d-01", voo.getAno(), voo.getMes());
+            Integer qtdPassageirosPagos = voo.getQtdPassageirosPagos();
+            Integer qtdPassageirosGratis = voo.getQtdPassageirosGratis();
+
+            Integer fkAeroportoOrigem = null;
+            for (Aeroporto aeroporto : aeroportos) {
+                if (aeroporto.getNomeAeroporto().equalsIgnoreCase(voo.getAeroportoOrigem())) {
+                    fkAeroportoOrigem = aeroporto.getId();
+                    break;
+                }
+            }
+
+            Integer fkAeroportoDestino = null;
+            for (Aeroporto aeroporto : aeroportos) {
+                if (aeroporto.getNomeAeroporto().equalsIgnoreCase(voo.getAeroportoDestino())) {
+                    fkAeroportoDestino = aeroporto.getId();
+                    break;
+                }
+            }
+
+            if (fkAeroportoOrigem != null && fkAeroportoDestino != null) {
+                valores.add(String.format("('%s', %d, %d, %d, %d)", dtViagem, fkAeroportoOrigem, fkAeroportoDestino, qtdPassageirosPagos, qtdPassageirosGratis));
+            }
+        }
+
+        if (valores.isEmpty()) {
+            return "";
+        }
+
+        sql.append(String.join(", ", valores));
+        sql.append(";");
 
         return sql.toString();
     }

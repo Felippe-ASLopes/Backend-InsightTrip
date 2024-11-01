@@ -49,7 +49,7 @@ public class InsertionService {
             logger.warn("Nenhum aeroporto para inserir.");
             return;
         }
-//        logger.info(sql);
+        logger.info(sql);
         int rows = jdbcTemplate.update(sql);
         logger.info("{}Inseridos {} aeroportos com sucesso.{}",LOG_COLOR_GREEN, rows, LOG_COLOR_RESET);
     }
@@ -61,7 +61,7 @@ public class InsertionService {
             logger.warn("Nenhuma viagem para inserir.");
             return;
         }
-//        logger.info(sql);
+        logger.info(sql);
 
         try {
             int rows = jdbcTemplate.update(sql);

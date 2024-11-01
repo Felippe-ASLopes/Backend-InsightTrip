@@ -53,9 +53,11 @@ public class InsightApplication {
             List<Aeroporto> aeroportos = transformationService.TransformarAeroportos(voos, paises, estados);
 
             // Inserção no Banco de Dados
+            logger.info("Inserindo dados no banco");
             insertionService.insertPaises(paises);
             insertionService.insertEstados(estados);
             insertionService.insertAeroportos(aeroportos);
+            insertionService.insertViagens(voos, aeroportos);
 
             logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
         } catch (Exception e) {

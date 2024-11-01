@@ -84,21 +84,13 @@ CREATE TABLE Viagem (
     idPassagem INT PRIMARY KEY AUTO_INCREMENT,
     dtViagem DATE,
     fkAeroportoOrigem INT, 
-    fkAeroportoDestino INT, 
+    fkAeroportoDestino INT,
+    QtdPassageirosPagos INT,
+    QtdPassageirosGratis INT,
     CONSTRAINT fkAeroportoOrigem FOREIGN KEY (fkAeroportoOrigem) 
         REFERENCES Aeroporto(idAeroporto),
     CONSTRAINT fkAeroportoDestino FOREIGN KEY (fkAeroportoDestino) 
         REFERENCES Aeroporto(idAeroporto)
-);
-
-CREATE TABLE Passageiros (
-    idPassageiros INT PRIMARY KEY AUTO_INCREMENT,
-    QtdPagos INT,
-    QtdGratis INT,
-    DataHora DATETIME,
-    fkPassagem INT,
-    CONSTRAINT fkPassagemPassageiros FOREIGN KEY (fkPassagem) 
-        REFERENCES Viagem(idPassagem)
 );
 
 select * from pais;
@@ -110,6 +102,18 @@ FROM aeroporto
 JOIN Pais ON idPais = fkPais
 LEFT JOIN UF ON CodigoIBGE = fkEstado
 ORDER BY Pais.Nome;
+
+SELECT idPassagem, dtViagem AS 'Data', 
+AeroportoOrigem.NomeAeroporto AS 'Aeroporto Origem', PaisOrigem.Nome AS 'País Origem', UFOrigem.Nome AS 'Estado Origem', 
+AeroportoDestino.NomeAeroporto AS 'Aeroporto Destino', PaisDestino.Nome AS 'País Destino', UFDestino.Nome AS 'Estado Destino', 
+QtdPassageirosPagos AS 'Passageiros Pagos', QtdPassageirosGratis AS 'Passageiros Grátis' FROM Viagem
+JOIN Aeroporto AS AeroportoOrigem ON fkAeroportoOrigem = AeroportoOrigem.idAeroporto
+JOIN Aeroporto AS AeroportoDestino ON fkAeroportoDestino = AeroportoDestino.idAeroporto
+JOIN Pais AS PaisOrigem ON AeroportoOrigem.fkPais = PaisOrigem.IdPais
+JOIN Pais AS PaisDestino ON AeroportoDestino.fkPais = PaisDestino.IdPais
+LEFT JOIN UF AS UFOrigem ON AeroportoOrigem.fkEstado = UFOrigem.CodigoIBGE
+JOIN UF AS UFDestino ON AeroportoDestino.fkEstado = UFDestino.CodigoIBGE
+ORDER BY dtViagem LIMIT 100000;
 
 
 -- DROP USER 'API'@'localhost'; --
