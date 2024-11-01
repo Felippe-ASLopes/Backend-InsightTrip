@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,18 +27,23 @@ public class InsightApplication {
         TransformationService transformationService = new TransformationService();
         InsertionService insertionService = new InsertionService(connection);
 
-        boolean acessarBucket = false;
 
-        if (acessarBucket) {
-            // Listar e Baixar Arquivos do Bucket
-            try {
-                List<S3Object> objetos = s3Service.ListarObjetos();
-                logger.info("Objetos no bucket:");
-                objetos.forEach(obj -> logger.info("- {}", obj.key()));
-                s3Service.BaixarArquivos(objetos);
-            } catch (Exception e) {
-                logger.error("Erro ao processar S3: {}", e.getMessage(), e);
+        // Listar e Baixar Arquivos do Bucket
+        try {
+            List<S3Object> objetos = s3Service.ListarObjetos();
+            logger.info("Objetos no bucket:");
+//                objetos.forEach(obj -> logger.info("- {}", obj.key()));
+
+            for (S3Object objeto : objetos) {
+                logger.info("{}", objeto.key());
+
+                if (!Files.exists(Path.of(objeto.key()))) {
+                    logger.info("Baixando arquivos do S3");
+                    s3Service.BaixarArquivos(objetos);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Erro ao processar S3: {}", e.getMessage(), e);
         }
 
         // Processamento do Arquivo Excel
