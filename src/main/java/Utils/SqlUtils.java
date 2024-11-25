@@ -1,9 +1,6 @@
 package Utils;
 
-import Model.Aeroporto;
-import Model.Estado;
-import Model.Pais;
-import Model.VooAnac;
+import Model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,8 +108,37 @@ public class SqlUtils {
 
         return sql.toString();
     }
+    public static String ConstruirInsertEventos(List<Evento> eventos) {
+        if (eventos == null || eventos.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sql = new StringBuilder("INSERT INTO Evento (Nome, DataInicio, DataFim) VALUES ");
+
+        for (Evento evento : eventos) {
+            sql.append(String.format("('%s', '%s', '%s')", escaparString(evento.getNome()), evento.getDataIncio(), evento.getDataFim()));
+            sql.append(",");
+        }
+
+        return sql.toString();
+    }
 
     private static String escaparString(String input) {
         return input.replace("'", "''");
+    }
+
+    public static String ConstruirInsertEventosEstados(List<Evento> eventos) {
+        if (eventos == null || eventos.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sql = new StringBuilder("INSERT INTO EventoHasEstado (fkEvento, fkEstado) VALUES ");
+
+        for (Evento evento : eventos) {
+            sql.append(String.format("('%i', '%i')", eventos.indexOf(evento) + 1, evento.getEstado()));
+            sql.append(",");
+        }
+
+        return sql.toString();
     }
 }

@@ -1,56 +1,40 @@
 package Model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 
 public class Evento {
 
-    private int id;
     private String nome;
-    private String descricao;
-    private Date dataHora;
+    private LocalDate dataIncio;
+    private LocalDate dataFim;
+    private Integer estado;
+
 
     //Construtor vazio
     public Evento() {}
 
-    //Construtor
-    public Evento(int id, String nome, String descricao, Date dataHora) {
-        this.id = id;
+    public Evento(String nome, LocalDate dataIncio, LocalDate dataFim, Integer estado) {
         this.nome = nome;
-        this.descricao = descricao;
-        this.dataHora = dataHora;
-    }
-
-
-    public int getId() {
-        return id;
+        this.dataIncio = dataIncio;
+        this.dataFim = dataFim;
+        this.estado = estado;
     }
 
     public String getNome() {
         return nome;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public LocalDate getDataIncio() {
+        return dataIncio;
     }
 
-    public Date getDataHora() {
-        return dataHora;
+    public LocalDate getDataFim() {
+        return dataFim;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public void setDataHora(Date dataHora) {
-        this.dataHora = dataHora;
+    public Integer getEstado() {
+        return estado;
     }
 }

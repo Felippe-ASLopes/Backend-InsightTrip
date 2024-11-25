@@ -1,9 +1,6 @@
+import Model.*;
 import Provider.DataBaseProvider;
 import Service.*;
-import Model.Aeroporto;
-import Model.Estado;
-import Model.Pais;
-import Model.VooAnac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -66,6 +63,23 @@ public class InsightApplication {
             insertionService.insertViagens(voos, aeroportos);
 
             logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
+        } catch (Exception e) {
+            logger.error("Erro durante o processamento: {}", e.getMessage(), e);
+        }
+
+
+        try {
+            nomeArquivo = "EventosTuristicos.xlsx";
+            caminho = Path.of(nomeArquivo);
+
+            List<Evento> eventos = excelService.ExtrairEventos(nomeArquivo, caminho);
+
+            logger.info("Inserindo Eventos");
+            insertionService.insertEventos(eventos);
+
+            logger.info("Inserindo EventoshasEstados");
+            insertionService.insertEventosEstados(eventos);
+
         } catch (Exception e) {
             logger.error("Erro durante o processamento: {}", e.getMessage(), e);
         }

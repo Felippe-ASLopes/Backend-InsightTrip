@@ -1,6 +1,8 @@
 package Service;
 
+import ETL.LeitorEventos;
 import ETL.LeitorVoos;
+import Model.Evento;
 import Model.VooAnac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,16 @@ public class ExcelService {
         try (InputStream fileStream = Files.newInputStream(caminho)) {
             logger.info("{} Iniciando leitura do arquivo {} {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
             return LeitorVoos.ExtrairViagem(nomeArquivo, fileStream);
+        } catch (IOException e) {
+            logger.error("Erro ao ler o arquivo {}: {}", nomeArquivo, e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Evento> ExtrairEventos(String nomeArquivo, Path caminho) {
+        try (InputStream fileStream = Files.newInputStream(caminho)) {
+            logger.info("{} Iniciando leitura do arquivo {} {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
+            return LeitorEventos.ExtrairEvento(nomeArquivo, fileStream);
         } catch (IOException e) {
             logger.error("Erro ao ler o arquivo {}: {}", nomeArquivo, e.getMessage(), e);
             throw new RuntimeException(e);

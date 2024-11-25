@@ -1,9 +1,6 @@
 package Service;
 
-import Model.Aeroporto;
-import Model.Estado;
-import Model.Pais;
-import Model.VooAnac;
+import Model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,6 +65,40 @@ public class InsertionService {
             logger.info("{}Inseridas {} viagens com sucesso.{}",LOG_COLOR_GREEN, rows, LOG_COLOR_RESET);
         } catch (Exception e) {
             logger.error("Erro ao inserir viagens: {}", e.getMessage(), e);
+        }
+    }
+
+    public void insertEventos(List<Evento> eventos) {
+        String sql = SqlUtils.ConstruirInsertEventos(eventos);
+
+        if (sql.isEmpty()) {
+            logger.warn("Nenhum evento para inserir.");
+            return;
+        }
+        logger.info(sql);
+
+        try {
+            int rows = jdbcTemplate.update(sql);
+            logger.info("{}Inseridos {} eventos com sucesso.{}",LOG_COLOR_GREEN, rows, LOG_COLOR_RESET);
+        } catch (Exception e) {
+            logger.error("Erro ao inserir eventos: {}", e.getMessage(), e);
+        }
+    }
+
+    public void insertEventosEstados(List<Evento> eventos) {
+        String sql = SqlUtils.ConstruirInsertEventosEstados(eventos);
+
+        if (sql.isEmpty()) {
+            logger.warn("Nenhum evento estado para inserir.");
+            return;
+        }
+        logger.info(sql);
+
+        try {
+            int rows = jdbcTemplate.update(sql);
+            logger.info("{}Inseridos {} eventos estados com sucesso.{}",LOG_COLOR_GREEN, rows, LOG_COLOR_RESET);
+        } catch (Exception e) {
+            logger.error("Erro ao inserir eventos estados: {}", e.getMessage(), e);
         }
     }
 }

@@ -36,7 +36,7 @@ public class Estado {
         this.codigoIbge = codigoIbge;
     }
 
-    public int ConverterCodigoIBGE(String uf) {
+    public static int ConverterCodigoIBGE(String uf) {
         return switch (uf) {
             case "Acre" -> 12;
             case "Alagoas" -> 27;
@@ -65,7 +65,7 @@ public class Estado {
             case "São Paulo" -> 35;
             case "Sergipe" -> 28;
             case "Tocantins" -> 17;
-            default -> -1;
+            default -> 1;
         };
     }
 
