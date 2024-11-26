@@ -24,35 +24,18 @@ public class InsightApplication {
         TransformationService transformationService = new TransformationService();
         InsertionService insertionService = new InsertionService(connection);
 
-
-        // Listar e Baixar Arquivos do Bucket
-        try {
-            List<S3Object> objetos = s3Service.ListarObjetos();
-            logger.info("Objetos no bucket:");
-//                objetos.forEach(obj -> logger.info("- {}", obj.key()));
-
-            for (S3Object objeto : objetos) {
-                logger.info("{}", objeto.key());
-
-                if (!Files.exists(Path.of(objeto.key()))) {
-                    logger.info("Baixando arquivos do S3");
-                    s3Service.BaixarArquivos(objetos);
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Erro ao processar S3: {}", e.getMessage(), e);
-        }
-
         // Processamento do Arquivo Excel
         String nomeArquivo = "resumo_anual_2024.xlsx";
         Path caminho = Path.of(nomeArquivo);
+
+        List<Estado> estados;
 
         try {
             List<VooAnac> voos = excelService.ExtrairVoos(nomeArquivo, caminho);
 
             // Transformação dos Dados
             List<Pais> paises = transformationService.TransformarPaises(voos);
-            List<Estado> estados = transformationService.TransformarEstados(voos);
+            estados = transformationService.TransformarEstados(voos);
             List<Aeroporto> aeroportos = transformationService.TransformarAeroportos(voos, paises, estados);
 
             // Inserção no Banco de Dados
@@ -62,14 +45,7 @@ public class InsightApplication {
             insertionService.insertAeroportos(aeroportos);
             insertionService.insertViagens(voos, aeroportos);
 
-            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
-        } catch (Exception e) {
-            logger.error("Erro durante o processamento: {}", e.getMessage(), e);
-        }
-
-
-        try {
-            nomeArquivo = "EventosTuristicos.xlsx";
+            nomeArquivo = "EventosSazonais.xlsx";
             caminho = Path.of(nomeArquivo);
 
             List<Evento> eventos = excelService.ExtrairEventos(nomeArquivo, caminho);
@@ -78,8 +54,10 @@ public class InsightApplication {
             insertionService.insertEventos(eventos);
 
             logger.info("Inserindo EventoshasEstados");
-            insertionService.insertEventosEstados(eventos);
+            insertionService.insertEventosEstados(eventos, estados);
 
+
+            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
         } catch (Exception e) {
             logger.error("Erro durante o processamento: {}", e.getMessage(), e);
         }

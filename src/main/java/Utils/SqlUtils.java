@@ -117,28 +117,50 @@ public class SqlUtils {
 
         for (Evento evento : eventos) {
             sql.append(String.format("('%s', '%s', '%s')", escaparString(evento.getNome()), evento.getDataIncio(), evento.getDataFim()));
-            sql.append(",");
+
+            if (eventos.indexOf(evento) < eventos.size() - 1){
+                sql.append(",");
+            }
+            else {
+                sql.append(";");
+            }
         }
+
+        return sql.toString();
+    }
+
+    public static String ConstruirInsertEventosEstados(List<Evento> eventos, List<Estado> estados) {
+        if (eventos == null || eventos.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sql = new StringBuilder("INSERT INTO EstadoHasEvento (fkEvento, fkEstado) VALUES ");
+
+        boolean isFirstValue = true;
+
+        for (Evento evento : eventos) {
+            if (evento.getEstado() != 1) {
+                if (!isFirstValue) {
+                    sql.append(",");
+                }
+                sql.append(String.format("('%d', '%d')", eventos.indexOf(evento) + 1, evento.getEstado()));
+                isFirstValue = false;
+            } else {
+                for (Estado estado : estados) {
+                    if (!isFirstValue) {
+                        sql.append(",");
+                    }
+                    sql.append(String.format("('%d', '%d')", eventos.indexOf(evento) + 1, estado.getCodigoIbge()));
+                    isFirstValue = false;
+                }
+            }
+        }
+        sql.append(";");
 
         return sql.toString();
     }
 
     private static String escaparString(String input) {
         return input.replace("'", "''");
-    }
-
-    public static String ConstruirInsertEventosEstados(List<Evento> eventos) {
-        if (eventos == null || eventos.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder sql = new StringBuilder("INSERT INTO EventoHasEstado (fkEvento, fkEstado) VALUES ");
-
-        for (Evento evento : eventos) {
-            sql.append(String.format("('%i', '%i')", eventos.indexOf(evento) + 1, evento.getEstado()));
-            sql.append(",");
-        }
-
-        return sql.toString();
     }
 }

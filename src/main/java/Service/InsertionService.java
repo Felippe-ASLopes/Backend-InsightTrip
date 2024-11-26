@@ -85,8 +85,8 @@ public class InsertionService {
         }
     }
 
-    public void insertEventosEstados(List<Evento> eventos) {
-        String sql = SqlUtils.ConstruirInsertEventosEstados(eventos);
+    public void insertEventosEstados(List<Evento> eventos, List<Estado> estados) {
+        String sql = SqlUtils.ConstruirInsertEventosEstados(eventos, estados);
 
         if (sql.isEmpty()) {
             logger.warn("Nenhum evento estado para inserir.");

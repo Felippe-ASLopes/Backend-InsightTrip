@@ -65,12 +65,12 @@ public class LeitorEventos {
 
                 try {
                     String nome = row.getCell(COL_NOME).getStringCellValue();
-                    String dtInicio = row.getCell(COL_DT_INICIO).getStringCellValue();
-                    String dtFim = row.getCell(COL_DT_FIM).getStringCellValue();
+                    LocalDate dtInicio = row.getCell(COL_DT_INICIO).getLocalDateTimeCellValue().toLocalDate();
+                    LocalDate dtFim = row.getCell(COL_DT_INICIO).getLocalDateTimeCellValue().toLocalDate();
                     Integer estado = Estado.ConverterCodigoIBGE(row.getCell(COL_ESTADO).getStringCellValue());
 
 
-                    Evento evento = new Evento(nome, LocalDate.parse(dtInicio), LocalDate.parse(dtFim), estado);
+                    Evento evento = new Evento(nome, dtInicio, dtFim, estado);
 
                     eventosExtraidas.add(evento);
                 } catch (NullPointerException | IllegalStateException e) {

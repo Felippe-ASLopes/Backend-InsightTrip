@@ -1,8 +1,8 @@
 CREATE DATABASE InsightTrip;
 USE InsightTrip;
 
-create user 'API'@'localhost' identified by 'webDataViz0API';
-grant insert, select, update on InsightTrip.* to 'API'@'localhost';
+-- create user 'API'@'localhost' identified by 'webDataViz0API'; --
+-- grant insert, select, update on InsightTrip.* to 'API'@'localhost'; --
 show grants for 'API'@'localhost';
 
 CREATE TABLE Funcionario (
@@ -51,22 +51,21 @@ CREATE TABLE Criminalidade (
         REFERENCES UF(CodigoIBGE) 
 );
 
-CREATE TABLE Eventos (
-    idEventos INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE Evento (
+    idEvento INT PRIMARY KEY AUTO_INCREMENT,
     Nome VARCHAR(45),
-    Descricao VARCHAR(45)
+    DataInicio DATE,
+    DataFim DATE
 );
 
-CREATE TABLE EstadoHasEventos (
+CREATE TABLE EstadoHasEvento (
     idEventoEstado INT PRIMARY KEY AUTO_INCREMENT,
-    dtEventoInicio DATE,
-    dtEventoTermino DATE,
     fkEstado INT,
     CONSTRAINT fkEstadoEventos FOREIGN KEY (fkEstado) 
         REFERENCES UF(CodigoIBGE),
-    fkEventos INT,
-    CONSTRAINT fkEventosEstado FOREIGN KEY (fkEventos) 
-        REFERENCES Eventos(idEventos)
+    fkEvento INT,
+    CONSTRAINT fkEventosEstado FOREIGN KEY (fkEvento) 
+        REFERENCES Evento(idEvento)
 );
 
 CREATE TABLE Aeroporto (
@@ -93,10 +92,6 @@ CREATE TABLE Viagem (
         REFERENCES Aeroporto(idAeroporto)
 );
 
-select * from pais;
-select * from UF;
-select * from aeroporto;
-
 SELECT idAeroporto, nomeAeroporto, UF.Nome AS NomeUF, Pais.Nome AS NomePais
 FROM aeroporto
 JOIN Pais ON idPais = fkPais
@@ -115,6 +110,10 @@ LEFT JOIN UF AS UFOrigem ON AeroportoOrigem.fkEstado = UFOrigem.CodigoIBGE
 JOIN UF AS UFDestino ON AeroportoDestino.fkEstado = UFDestino.CodigoIBGE
 ORDER BY dtViagem LIMIT 100000;
 
+SELECT UF.Nome as 'Estado', Evento.Nome as 'Evento', DataInicio as 'Data início', DataFim as 'Data fim'FROM EstadoHasEvento
+JOIN UF ON CodigoIBGE = fkEstado
+JOIN Evento ON idEvento = fkEvento
+ORDER BY UF.Nome LIMIT 1000000;
 
 -- DROP USER 'API'@'localhost'; --
 -- DROP DATABASE InsightTrip--
