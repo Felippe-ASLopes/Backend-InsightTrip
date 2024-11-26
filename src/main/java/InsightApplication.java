@@ -24,6 +24,23 @@ public class InsightApplication {
         TransformationService transformationService = new TransformationService();
         InsertionService insertionService = new InsertionService(connection);
 
+        // Listar e Baixar Arquivos do Bucket
+        try {
+            List<S3Object> objetos = s3Service.ListarObjetos();
+            logger.info("Objetos no bucket:");
+//                objetos.forEach(obj -> logger.info("- {}", obj.key()));
+            for (S3Object objeto : objetos) {
+                logger.info("{}", objeto.key());
+                if (!Files.exists(Path.of(objeto.key()))) {
+                    logger.info("Baixando arquivos do S3");
+                    s3Service.BaixarArquivos(objetos);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Erro ao processar S3: {}", e.getMessage(), e);
+        }
+
+
         // Processamento do Arquivo Excel
         String nomeArquivo = "resumo_anual_2024.xlsx";
         Path caminho = Path.of(nomeArquivo);
