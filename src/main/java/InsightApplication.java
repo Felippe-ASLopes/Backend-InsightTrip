@@ -26,20 +26,22 @@ public class InsightApplication {
 
         // Listar e Baixar Arquivos do Bucket
         try {
-            List<S3Object> objetos = s3Service.ListarObjetos();
+            List<S3Object> objetos = s3Service.listarObjetos();
             logger.info("Objetos no bucket:");
-//                objetos.forEach(obj -> logger.info("- {}", obj.key()));
+
             for (S3Object objeto : objetos) {
-                logger.info("{}", objeto.key());
-                if (!Files.exists(Path.of(objeto.key()))) {
-                    logger.info("Baixando arquivos do S3");
-                    s3Service.BaixarArquivos(objetos);
+                logger.info("Verificando arquivo: {}", objeto.key());
+                Path caminhoLocal = Path.of(objeto.key());
+                if (!Files.exists(caminhoLocal)) {
+                    logger.info("Arquivo faltante encontrado. Baixando: {}", objeto.key());
+                    s3Service.baixarArquivo(objeto);
+                } else {
+                    logger.info("Arquivo já existe localmente: {}", objeto.key());
                 }
             }
         } catch (Exception e) {
             logger.error("Erro ao processar S3: {}", e.getMessage(), e);
         }
-
 
         // Processamento do Arquivo Excel
         String nomeArquivo = "resumo_anual_2024.xlsx";
@@ -73,8 +75,7 @@ public class InsightApplication {
             logger.info("Inserindo EventoshasEstados");
             insertionService.insertEventosEstados(eventos, estados);
 
-
-            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}",LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
+            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
         } catch (Exception e) {
             logger.error("Erro durante o processamento: {}", e.getMessage(), e);
         }

@@ -8,10 +8,10 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import Provider.S3Provider;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class S3Service {
@@ -20,31 +20,42 @@ public class S3Service {
     private final String bucketName;
 
     public S3Service() {
-        Dotenv dotenv = Dotenv.load();
         S3Provider s3Provider = new S3Provider();
         this.s3Client = s3Provider.getS3Client();
+        Dotenv dotenv = Dotenv.load(); // Garantir que Dotenv está carregado aqui
         this.bucketName = dotenv.get("NOME_BUCKET");
     }
 
-    public List<S3Object> ListarObjetos() {
-        ListObjectsRequest listaObjetos = ListObjectsRequest.builder()
+    public List<S3Object> listarObjetos() {
+        ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
                 .bucket(bucketName)
                 .build();
-        return s3Client.listObjects(listaObjetos).contents();
+        ListObjectsV2Response response = s3Client.listObjectsV2(listObjectsV2Request);
+        return response.contents();
     }
 
-    public void BaixarArquivos(List<S3Object> objects) {
+    public void baixarArquivos(List<S3Object> objects) {
         for (S3Object object : objects) {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(object.key())
-                    .build();
-            try (InputStream inputStream = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream())) {
-                Files.copy(inputStream, new File(object.key()).toPath());
-                logger.info("Arquivo baixado: {}", object.key());
-            } catch (IOException | S3Exception e) {
-                logger.error("Erro ao baixar arquivo {}: {}", object.key(), e.getMessage(), e);
+            baixarArquivo(object);
+        }
+    }
+
+    public void baixarArquivo(S3Object objeto) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objeto.key())
+                .build();
+        try (InputStream inputStream = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream())) {
+            Path path = Path.of(objeto.key());
+            // Cria diretórios pai se não existirem
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
             }
+            // Sobrescrever se existir para evitar erros
+            Files.copy(inputStream, path);
+            logger.info("Arquivo baixado: {}", objeto.key());
+        } catch (IOException | S3Exception e) {
+            logger.error("Erro ao baixar arquivo {}: {}", objeto.key(), e.getMessage(), e);
         }
     }
 }
