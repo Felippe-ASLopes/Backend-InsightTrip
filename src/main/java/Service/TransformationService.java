@@ -1,10 +1,9 @@
 package Service;
 
-import Model.Aeroporto;
-import Model.Estado;
-import Model.Pais;
-import Model.VooAnac;
+import Model.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -83,5 +82,47 @@ public class TransformationService {
                 })
                 .filter(aeroporto -> aeroporto.getFkPais() != null)
                 .collect(Collectors.toList());
+    }
+
+//    Método para base "BancoVDE 2023.xlxs", que foi substituida
+//    public List<Crime> AgregarCrimes(List<Crime> crimes) {
+//        Map<String, Crime> mapaCrimes = new HashMap<>();
+//
+//        for (Crime crime : crimes) {
+//            String nome = crime.getNome();
+//            Integer estado = crime.getEstado();
+//            LocalDate data = crime.getData();
+//
+//
+//            String chave = nome + "_" + estado + "_" + data.getMonthValue() + "_" + data.getYear();
+//
+//            if (mapaCrimes.containsKey(chave)) {
+//                Crime existente = mapaCrimes.get(chave);
+//                existente.setQtdOcorrencia(existente.getQtdOcorrencia() + 1);
+//            } else {
+//                Crime novoCrime = new Crime(nome, data, estado, 1);
+//                mapaCrimes.put(chave, novoCrime);
+//            }
+//        }
+//
+//        return new ArrayList<>(mapaCrimes.values());
+//    }
+
+    public static int converterMes(String mes) {
+        return switch (mes.toLowerCase()) {
+            case "janeiro" -> 1;
+            case "fevereiro" -> 2;
+            case "março", "marco" -> 3;
+            case "abril" -> 4;
+            case "maio" -> 5;
+            case "junho" -> 6;
+            case "julho" -> 7;
+            case "agosto" -> 8;
+            case "setembro" -> 9;
+            case "outubro" -> 10;
+            case "novembro" -> 11;
+            case "dezembro" -> 12;
+            default -> -1;
+        };
     }
 }

@@ -101,4 +101,21 @@ public class InsertionService {
             logger.error("Erro ao inserir eventos estados: {}", e.getMessage(), e);
         }
     }
+
+    public void insertCrimes(List<Crime> crimes) {
+        String sql = SqlUtils.ConstruirInsertCrimes(crimes);
+
+        if (sql.isEmpty()) {
+            logger.warn("Nenhum crime para inserir.");
+            return;
+        }
+//        logger.info(sql);
+
+        try {
+            int rows = jdbcTemplate.update(sql);
+            logger.info("{}Inseridos {} crimes com sucesso.{}",LOG_COLOR_GREEN, rows, LOG_COLOR_RESET);
+        } catch (Exception e) {
+            logger.error("Erro ao inserir crimes: {}", e.getMessage(), e);
+        }
+    }
 }

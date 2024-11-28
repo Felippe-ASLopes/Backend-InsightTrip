@@ -1,6 +1,7 @@
 import Model.*;
 import Provider.DataBaseProvider;
 import Service.*;
+import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,6 +44,7 @@ public class InsightApplication {
             logger.error("Erro ao processar S3: {}", e.getMessage(), e);
         }
 
+
         // Processamento do Arquivo Excel
         String nomeArquivo = "resumo_anual_2024.xlsx";
         Path caminho = Path.of(nomeArquivo);
@@ -74,6 +76,14 @@ public class InsightApplication {
 
             logger.info("Inserindo EventoshasEstados");
             insertionService.insertEventosEstados(eventos, estados);
+
+            nomeArquivo = "indicadoressegurancapublicauf.xlsx";
+            caminho = Path.of(nomeArquivo);
+
+            List<Crime> crimes = excelService.ExtrairCrimes(nomeArquivo, caminho);
+
+            logger.info("Inserindo Crimes");
+            insertionService.insertCrimes(crimes);
 
             logger.info("{}Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
         } catch (Exception e) {

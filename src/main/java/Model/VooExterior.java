@@ -36,23 +36,6 @@ public class VooExterior {
         return qtdViagens;
     }
 
-    public static int converterMes(String mes) {
-        return switch (mes.toLowerCase()) {
-            case "janeiro" -> 1;
-            case "fevereiro" -> 2;
-            case "março", "marco" -> 3;
-            case "abril" -> 4;
-            case "maio" -> 5;
-            case "junho" -> 6;
-            case "julho" -> 7;
-            case "agosto" -> 8;
-            case "setembro" -> 9;
-            case "outubro" -> 10;
-            case "novembro" -> 11;
-            case "dezembro" -> 12;
-            default -> -1;
-        };
-    }
     public String converterToStringMes() {
         return switch (this.mes) {
             case 1 -> "janeiro";

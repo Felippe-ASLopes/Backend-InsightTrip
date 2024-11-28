@@ -160,6 +160,28 @@ public class SqlUtils {
         return sql.toString();
     }
 
+    public static String ConstruirInsertCrimes(List<Crime> crimes) {
+        if (crimes == null || crimes.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sql = new StringBuilder("INSERT INTO Crime (Nome, qtdOcorrencia, Data, fkestado) VALUES ");
+
+
+        for (Crime crime : crimes) {
+            sql.append(String.format("('%s', '%d', '%d-%d-1', '%d')", escaparString(crime.getNome()), crime.getQtdOcorrencia(), crime.getAno(), crime.getMes(), crime.getEstado()));
+
+            if (crimes.indexOf(crime) < crimes.size() - 1){
+                sql.append(",");
+            }
+            else {
+                sql.append(";");
+            }
+        }
+
+        return sql.toString();
+    }
+
     private static String escaparString(String input) {
         return input.replace("'", "''");
     }

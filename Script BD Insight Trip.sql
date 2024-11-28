@@ -41,11 +41,11 @@ CREATE TABLE UF (
     Regiao VARCHAR(45)
 );
 
-CREATE TABLE Criminalidade (
-    idCriminalidade INT PRIMARY KEY AUTO_INCREMENT,
-    DataHora DATETIME,
-    QtdVitimas INT, 
-    MunicipiosPerigosos VARCHAR(45),
+CREATE TABLE Crime (
+    idCrime INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(45),
+    qtdOcorrencia INT,
+    Data DATE,
     fkEstado INT,
     CONSTRAINT fkEstadoCriminalidade FOREIGN KEY (fkEstado) 
         REFERENCES UF(CodigoIBGE) 
@@ -113,6 +113,10 @@ ORDER BY dtViagem LIMIT 100000;
 SELECT UF.Nome as 'Estado', Evento.Nome as 'Evento', DataInicio as 'Data início', DataFim as 'Data fim'FROM EstadoHasEvento
 JOIN UF ON CodigoIBGE = fkEstado
 JOIN Evento ON idEvento = fkEvento
+ORDER BY UF.Nome LIMIT 1000000;
+
+SELECT UF.Nome, Crime.Nome, qtdOcorrencia, data FROM Crime
+JOIN UF ON fkEstado = CodigoIBGE
 ORDER BY UF.Nome LIMIT 1000000;
 
 -- DROP USER 'API'@'localhost'; --
