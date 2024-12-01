@@ -88,11 +88,6 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.11</version>
         </dependency>
-        <dependency>
-            <groupId>com.slack.api</groupId>
-            <artifactId>slack-api-client</artifactId>
-            <version>1.44.1</version>
-        </dependency>
     </dependencies>
 
     <build>
