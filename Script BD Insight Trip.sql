@@ -158,41 +158,10 @@ JOIN
 JOIN
     Evento ON EHE.fkEvento = Evento.idEvento
 WHERE 
-    Evento.Nome = 'Natal'
+    Evento.Nome = 'Carnaval'
 ORDER BY
     UF.Nome,
     Evento.Nome;
-    
-SELECT V.*, A.fkEstado
-FROM Viagem V
-JOIN Aeroporto A ON V.fkAeroportoDestino = A.idAeroporto
-JOIN EstadoHasEvento EHE ON A.fkEstado = EHE.fkEstado
-JOIN Evento E ON EHE.fkEvento = E.idEvento
-WHERE E.Nome = 'Natal'
-  AND V.dtViagem = E.DataInicio;
-
-SELECT 
-    UF.Nome AS NomeUF,
-    SUM(C.qtdOcorrencia) AS TotalOcorrencias
-FROM 
-    Crime C
-JOIN 
-    UF ON C.fkEstado = UF.CodigoIBGE
-JOIN 
-    EstadoHasEvento EHE ON C.fkEstado = EHE.fkEstado
-JOIN 
-    Evento E ON EHE.fkEvento = E.idEvento
-WHERE 
-    E.Nome = 'Natal'
-    AND C.Data BETWEEN E.DataInicio AND E.DataFim
-GROUP BY 
-    UF.Nome
-ORDER BY 
-    UF.Nome;
-
-  
-Select count(idPassagem) from Viagem;
-Select * from viagem where dtViagem = "2023-12-25" limit 100000;
     
 -- DROP USER 'API'@'localhost'; --
 -- DROP DATABASE InsightTrip--

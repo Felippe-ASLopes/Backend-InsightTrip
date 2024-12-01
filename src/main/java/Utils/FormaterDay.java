@@ -44,7 +44,22 @@ public class FormaterDay {
     }
 
     public static void formatarMes() {
-        configDia(12, 25, 0.25);
+        configDia(12, 25, 0.40);
+        configDia(01, 1, 0.25);
+        configDia(02, 13, 0.50);
+        configDia(03, 1, 0.10);
+        configDia(03, 15, 0.10);
+        configDia(04, 17, 0.25);
+        configDia(04, 17, 0.25);
+        configDia(05, 8, 0.25);
+        configDia(06, 12, 0.25);
+        configDia(06, 24, 0.25);
+        configDia(06, 28, 0.10);
+        configDia(07, 26, 0.25);
+        configDia(8, 11, 0.25);
+        configDia(10, 12, 0.25);
+        configDia(10, 31, 0.25);
+        configDia(11, 29, 0.25);
     }
 
     public static LocalDate formatarDia(int ano, int mes, boolean specialDayRule) {
