@@ -119,5 +119,80 @@ SELECT UF.Nome, Crime.Nome, qtdOcorrencia, data FROM Crime
 JOIN UF ON fkEstado = CodigoIBGE
 ORDER BY UF.Nome LIMIT 1000000;
 
+
+SELECT
+    UF.Nome AS NomeUF,
+    Evento.Nome AS NomeEvento,
+
+    -- Calcula a porcentagem de crimes durante o evento em relação ao total de crimes no UF, arredondando para duas casas decimais
+    ROUND(
+        COALESCE(
+            (SELECT SUM(C.qtdOcorrencia)
+             FROM Crime C
+             WHERE C.fkEstado = UF.CodigoIBGE
+               AND C.Data BETWEEN Evento.DataInicio AND Evento.DataFim
+            ), 0
+        ) * 1.0 / 
+        COALESCE(
+            (SELECT SUM(C2.qtdOcorrencia)
+             FROM Crime C2
+             WHERE C2.fkEstado = UF.CodigoIBGE
+            ), 1
+        ) * 100, 
+    2) AS PorcentagemCrimes,
+
+    -- Conta o total de viagens com destino ao UF durante o evento
+    COALESCE(
+        (SELECT COUNT(V.idPassagem)
+         FROM Viagem V
+         JOIN Aeroporto A ON V.fkAeroportoDestino = A.idAeroporto
+         WHERE A.fkEstado = UF.CodigoIBGE
+           AND V.dtViagem BETWEEN Evento.DataInicio AND Evento.DataFim
+        ), 0
+    ) AS TotalViagensDestino
+
+FROM
+    UF
+JOIN
+    EstadoHasEvento EHE ON UF.CodigoIBGE = EHE.fkEstado
+JOIN
+    Evento ON EHE.fkEvento = Evento.idEvento
+WHERE 
+    Evento.Nome = 'Natal'
+ORDER BY
+    UF.Nome,
+    Evento.Nome;
+    
+SELECT V.*, A.fkEstado
+FROM Viagem V
+JOIN Aeroporto A ON V.fkAeroportoDestino = A.idAeroporto
+JOIN EstadoHasEvento EHE ON A.fkEstado = EHE.fkEstado
+JOIN Evento E ON EHE.fkEvento = E.idEvento
+WHERE E.Nome = 'Natal'
+  AND V.dtViagem = E.DataInicio;
+
+SELECT 
+    UF.Nome AS NomeUF,
+    SUM(C.qtdOcorrencia) AS TotalOcorrencias
+FROM 
+    Crime C
+JOIN 
+    UF ON C.fkEstado = UF.CodigoIBGE
+JOIN 
+    EstadoHasEvento EHE ON C.fkEstado = EHE.fkEstado
+JOIN 
+    Evento E ON EHE.fkEvento = E.idEvento
+WHERE 
+    E.Nome = 'Natal'
+    AND C.Data BETWEEN E.DataInicio AND E.DataFim
+GROUP BY 
+    UF.Nome
+ORDER BY 
+    UF.Nome;
+
+  
+Select count(idPassagem) from Viagem;
+Select * from viagem where dtViagem = "2023-12-25" limit 100000;
+    
 -- DROP USER 'API'@'localhost'; --
 -- DROP DATABASE InsightTrip--

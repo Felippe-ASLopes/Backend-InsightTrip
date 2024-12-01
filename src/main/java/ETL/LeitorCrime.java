@@ -6,6 +6,7 @@ import Model.Evento;
 import Model.VooAnac;
 import Service.TransformationService;
 import Utils.CellUtils;
+import Utils.FormaterDay;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -69,11 +70,13 @@ public class LeitorCrime {
                 try {
                     Integer estado = Estado.ConverterCodigoIBGE(row.getCell(COL_ESTADO).getStringCellValue());
                     String nome = row.getCell(COL_NOME).getStringCellValue();
-                    Integer ano = getIntegerCellValue(row.getCell(COL_ANO));
+                    Integer ano = 2023;
                     Integer mes = TransformationService.converterMes(row.getCell(COL_MES).getStringCellValue());
                     Integer qtdOcorrencia = getIntegerCellValue(row.getCell(COL_QTDOCORRENCIAS));
 
-                    Crime crime = new Crime(nome, ano, mes, estado, qtdOcorrencia);
+                    LocalDate dataCrime = FormaterDay.formatarDia(ano, mes, true);
+
+                    Crime crime = new Crime(nome, dataCrime, estado, qtdOcorrencia);
 
                     crimesExtraidos.add(crime);
                 } catch (NullPointerException | IllegalStateException e) {

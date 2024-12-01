@@ -128,7 +128,7 @@ public class LeitorVoos {
 
 
                         FormaterDay.formatarMes();
-                        LocalDate dataViagem = FormaterDay.formatarDia(ano, mes, true);
+                        LocalDate dataViagem = FormaterDay.formatarDia(ano, mes);
 
                         VooAnac viagem = new VooAnac(dataViagem,
                                 nomeAeroportoOrigem, ufAeroportoOrigem, regiaoAeroportoOrigem, nomePaisOrigem, nomeContinenteOrigem,

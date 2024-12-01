@@ -74,7 +74,8 @@ public class SqlUtils {
         List<String> valores = new ArrayList<>();
 
         for (VooAnac voo : voos) {
-            String dtViagem = String.format("%04d-%02d-01", voo.getAno(), voo.getMes());
+
+            String dtViagem = voo.getDataViagem().toString();
             Integer qtdPassageirosPagos = voo.getQtdPassageirosPagos();
             Integer qtdPassageirosGratis = voo.getQtdPassageirosGratis();
 
@@ -169,7 +170,7 @@ public class SqlUtils {
 
 
         for (Crime crime : crimes) {
-            sql.append(String.format("('%s', '%d', '%d-%d-1', '%d')", escaparString(crime.getNome()), crime.getQtdOcorrencia(), crime.getAno(), crime.getMes(), crime.getEstado()));
+            sql.append(String.format("('%s', '%d', '%s', '%d')", escaparString(crime.getNome()), crime.getQtdOcorrencia(), crime.getData(), crime.getEstado()));
 
             if (crimes.indexOf(crime) < crimes.size() - 1){
                 sql.append(",");

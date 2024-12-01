@@ -1,10 +1,9 @@
 package Model;
 
-import java.time.LocalDate;
-
 public class VooAnac {
 
-    private LocalDate dataViagem;
+    private Integer ano;
+    private Integer mes;
     private String aeroportoOrigem;
     private String ufAeroportoOrigem;
     private String regiaoAeroportoOrigem;
@@ -18,11 +17,12 @@ public class VooAnac {
     private Integer qtdPassageirosPagos;
     private Integer qtdPassageirosGratis;
 
-    public VooAnac(LocalDate dataViagem,
+    public VooAnac(Integer ano, Integer mes,
                    String aeroportoOrigem, String ufAeroportoOrigem, String regiaoAeroportoOrigem, String paisOrigem, String continentePaisOrigem,
                    String aeroportoDestino, String ufAeroportoDestino, String regiaoAeroportoDestino, String paisDestino,
                    Integer qtdPassageirosPagos, Integer qtdPassageirosGratis) {
-        this.dataViagem = dataViagem;
+        this.ano = ano;
+        this.mes = mes;
         this.aeroportoOrigem = aeroportoOrigem;
         this.ufAeroportoOrigem = ufAeroportoOrigem;
         this.regiaoAeroportoOrigem = regiaoAeroportoOrigem;
@@ -36,8 +36,12 @@ public class VooAnac {
         this.qtdPassageirosGratis = qtdPassageirosGratis;
     }
 
-    public LocalDate getDataViagem() {
-        return dataViagem;
+    public Integer getAno() {
+        return ano;
+    }
+
+    public Integer getMes() {
+        return mes;
     }
 
     public String getAeroportoOrigem() {
@@ -91,7 +95,8 @@ public class VooAnac {
     @Override
     public String toString() {
         return "VooAnac{" +
-                "dataViagem=" + dataViagem +
+                "ano=" + ano +
+                ", mes=" + mes +
                 ", aeroportoOrigem='" + aeroportoOrigem + '\'' +
                 ", ufAeroportoOrigem='" + ufAeroportoOrigem + '\'' +
                 ", regiaoAeroportoOrigem='" + regiaoAeroportoOrigem + '\'' +

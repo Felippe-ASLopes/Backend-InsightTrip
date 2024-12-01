@@ -46,7 +46,7 @@ public class InsightApplication {
 
 
         // Processamento do Arquivo Excel
-        String nomeArquivo = "resumo_anual_2024.xlsx";
+        String nomeArquivo = "resumo_anual_2023.xlsx";
         Path caminho = Path.of(nomeArquivo);
 
         List<Estado> estados;

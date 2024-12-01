@@ -6,15 +6,13 @@ import java.util.Date;
 public class Crime {
 
     private String nome;
-    private Integer ano;
-    private Integer mes;
+    private LocalDate data;
     private Integer estado;
     private Integer qtdOcorrencia;
 
-    public Crime(String nome, Integer ano, Integer mes, Integer estado, Integer qtdOcorrencia) {
+    public Crime(String nome, LocalDate data, Integer estado, Integer qtdOcorrencia) {
         this.nome = nome;
-        this.ano = ano;
-        this.mes = mes;
+        this.data = data;
         this.estado = estado;
         this.qtdOcorrencia = qtdOcorrencia;
     }
@@ -23,13 +21,7 @@ public class Crime {
         return nome;
     }
 
-    public Integer getAno() {
-        return ano;
-    }
-
-    public Integer getMes() {
-        return mes;
-    }
+    public LocalDate getData() {return data;}
 
     public Integer getEstado() {
         return estado;

@@ -26,23 +26,23 @@ public class InsightApplication {
         InsertionService insertionService = new InsertionService(connection);
 
         // Listar e Baixar Arquivos do Bucket
-//        try {
-//            List<S3Object> objetos = s3Service.listarObjetos();
-//            logger.info("Objetos no bucket:");
-//
-//            for (S3Object objeto : objetos) {
-//                logger.info("Verificando arquivo: {}", objeto.key());
-//                Path caminhoLocal = Path.of(objeto.key());
-//                if (!Files.exists(caminhoLocal)) {
-//                    logger.info("Arquivo faltante encontrado. Baixando: {}", objeto.key());
-//                    s3Service.baixarArquivo(objeto);
-//                } else {
-//                    logger.info("Arquivo já existe localmente: {}", objeto.key());
-//                }
-//            }
-//        } catch (Exception e) {
-//            logger.error("Erro ao processar S3: {}", e.getMessage(), e);
-//        }
+        try {
+            List<S3Object> objetos = s3Service.listarObjetos();
+            logger.info("Objetos no bucket:");
+
+            for (S3Object objeto : objetos) {
+                logger.info("Verificando arquivo: {}", objeto.key());
+                Path caminhoLocal = Path.of(objeto.key());
+                if (!Files.exists(caminhoLocal)) {
+                    logger.info("Arquivo faltante encontrado. Baixando: {}", objeto.key());
+                    s3Service.baixarArquivo(objeto);
+                } else {
+                    logger.info("Arquivo já existe localmente: {}", objeto.key());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Erro ao processar S3: {}", e.getMessage(), e);
+        }
 
 
         // Processamento do Arquivo Excel
