@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import software.amazon.awssdk.services.s3.model.S3Object;
+
+import javax.xml.crypto.Data;
+
 import static Log.Log.LOG_COLOR_RESET;
 import static Log.Log.LOG_COLOR_GREEN;
 
@@ -21,6 +24,7 @@ public class InsightApplication {
         DataBaseProvider cnp = new DataBaseProvider();
         JdbcTemplate connection = cnp.getConnection();
 
+        DataBaseService dataBaseService = new DataBaseService();
         ExcelService excelService = new ExcelService();
         TransformationService transformationService = new TransformationService();
         InsertionService insertionService = new InsertionService(connection);
@@ -50,46 +54,52 @@ public class InsightApplication {
         Path caminho = Path.of(nomeArquivo);
 
         List<Estado> estados;
+        Integer qtdViagens = dataBaseService.getQtdViagens();
 
-        try {
-            List<VooAnac> voos = excelService.ExtrairVoos(nomeArquivo, caminho);
+        logger.info("Quantidade de Viagens: {}", qtdViagens);
 
-            // Transformação dos Dados
-            List<Pais> paises = transformationService.TransformarPaises(voos);
-            estados = transformationService.TransformarEstados(voos);
-            List<Aeroporto> aeroportos = transformationService.TransformarAeroportos(voos, paises, estados);
+        if (qtdViagens == 0) {
 
-            // Inserção no Banco de Dados
-            logger.info("Inserindo dados no banco");
-            insertionService.insertPaises(paises);
-            insertionService.insertEstados(estados);
-            insertionService.insertAeroportos(aeroportos);
-            insertionService.insertViagens(voos, aeroportos);
+            try {
+                List<VooAnac> voos = excelService.ExtrairVoos(nomeArquivo, caminho);
 
-            nomeArquivo = "EventosSazonais.xlsx";
-            caminho = Path.of(nomeArquivo);
+                // Transformação dos Dados
+                List<Pais> paises = transformationService.TransformarPaises(voos);
+                estados = transformationService.TransformarEstados(voos);
+                List<Aeroporto> aeroportos = transformationService.TransformarAeroportos(voos, paises, estados);
 
-            List<Evento> eventos = excelService.ExtrairEventos(nomeArquivo, caminho);
+                // Inserção no Banco de Dados
+                logger.info("Inserindo dados no banco");
+                insertionService.insertPaises(paises);
+                insertionService.insertEstados(estados);
+                insertionService.insertAeroportos(aeroportos);
+                insertionService.insertViagens(voos, aeroportos);
 
-            logger.info("Inserindo Eventos");
-            insertionService.insertEventos(eventos);
+                nomeArquivo = "EventosSazonais.xlsx";
+                caminho = Path.of(nomeArquivo);
 
-            logger.info("Inserindo EventoshasEstados");
-            insertionService.insertEventosEstados(eventos, estados);
+                List<Evento> eventos = excelService.ExtrairEventos(nomeArquivo, caminho);
 
-            nomeArquivo = "indicadoressegurancapublicauf.xlsx";
-            caminho = Path.of(nomeArquivo);
+                logger.info("Inserindo Eventos");
+                insertionService.insertEventos(eventos);
 
-            List<Crime> crimes = excelService.ExtrairCrimes(nomeArquivo, caminho);
+                logger.info("Inserindo EventoshasEstados");
+                insertionService.insertEventosEstados(eventos, estados);
 
-            logger.info("Inserindo Crimes");
-            insertionService.insertCrimes(crimes);
+                nomeArquivo = "indicadoressegurancapublicauf.xlsx";
+                caminho = Path.of(nomeArquivo);
 
-            logger.info("{}Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
+                List<Crime> crimes = excelService.ExtrairCrimes(nomeArquivo, caminho);
 
-            ConecaoSlack.enviarMensagemSlack();
-        } catch (Exception e) {
-            logger.error("Erro durante o processamento: {}", e.getMessage(), e);
+                logger.info("Inserindo Crimes");
+                insertionService.insertCrimes(crimes);
+
+                logger.info("{}Base de dados {} inseridas no banco com sucesso! {}", LOG_COLOR_GREEN, nomeArquivo, LOG_COLOR_RESET);
+
+                ConecaoSlack.enviarMensagemSlack();
+            } catch (Exception e) {
+                logger.error("Erro durante o processamento: {}", e.getMessage(), e);
+            }
         }
     }
 }
